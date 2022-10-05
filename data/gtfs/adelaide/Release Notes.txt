@@ -1,0 +1,15 @@
+Adelaide Metro GTFS Release Notes
+
+The following is a list of changes and upcoming events:
+
+
+Upcoming Public Holidays:
+
+20221003 - Labour Day
+20221225 - Christmas Day
+20221227 - Proclamation Day Holiday
+20230101 - New Year's Day
+
+General Amendments:
+
+1) Fixed issue with shape data for route 202.
