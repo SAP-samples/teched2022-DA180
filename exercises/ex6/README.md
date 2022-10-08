@@ -2,7 +2,7 @@
 
 In this exercise, we will create...
 
-## Exercise 6.1 Sub Exercise 1 Description<a name="subex1"></a>
+## Exercise 6.1 Prepare and explore fuel station classification data<a name="subex1"></a>
 
 After completing these steps you will have created...
 
@@ -34,7 +34,7 @@ SELECT * FROM "AIS_DEMO"."GDELT_GEG" WHERE "lang" = 'en';
 
 ![](images/c02_01_0010.png)
 
-## Exercise 6.2 Sub Exercise 2 Description<a name="subex2"></a>
+## Exercise 6.2 Enrich fuel station classification data with spatial attributes<a name="subex2"></a>
 
 After completing these steps you will have...
 
@@ -52,6 +52,8 @@ READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
 
 2.	Click here.
 <br>![](/exercises/ex6/images/02_02_0010.png)
+
+## Exercise 6.3 Build fuel station classification model and evaluate impact of attributes<a name="subex3"></a>
 
 ## Summary
 
