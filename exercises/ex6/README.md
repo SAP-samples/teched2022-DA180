@@ -1,22 +1,40 @@
-# Exercise 2 - Exercise 2 Description
+# Exercise 6 - Build a ML classification model on multi-model data
 
 In this exercise, we will create...
 
-## Exercise 2.1 Sub Exercise 1 Description
+## Exercise 6.1 Sub Exercise 1 Description
 
 After completing these steps you will have created...
 
 1. Click here.
-<br>![](/exercises/ex2/images/02_01_0010.png)
+<br>![](/exercises/ex6/images/02_01_0010.png)
 
 2.	Insert this line of code.
 ```abap
 response->set_text( |Hello ABAP World! | ). 
 ```
 
+````Python
+
+import hana_ml
+from hana_ml.docstore import create_collection_from_elements
+
+respGEG = requests.get('http://data.gdeltproject.org/gdeltv3/geg_gcnlapi/20211108120300.geg-gcnlapi.json.gz')
+
+with gzip.open(BytesIO(respGEG.content), 'rt', encoding='utf-8') as f:
+    content = f.read().splitlines()
 
 
-## Exercise 2.2 Sub Exercise 2 Description
+````
+Once stored in a HANA collection, we can query the data using SQL.
+
+````SQL
+SELECT * FROM "AIS_DEMO"."GDELT_GEG" WHERE "lang" = 'en';
+````
+
+![](images/c02_01_0010.png)
+
+## Exercise 6.2 Sub Exercise 2 Description
 
 After completing these steps you will have...
 
@@ -33,10 +51,9 @@ READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
 ```
 
 2.	Click here.
-<br>![](/exercises/ex2/images/02_02_0010.png)
+<br>![](/exercises/ex6/images/02_02_0010.png)
 
 ## Summary
 
-You've now ...
+You've now concluded the last exercise, congratulations! 
 
-Continue to - [Exercise 3 - Excercise 3 ](../ex3/README.md)
