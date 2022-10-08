@@ -2,7 +2,7 @@
 
 In this exercise, we will create...
 
-## Exercise 6.1 Sub Exercise 1 Description
+## Exercise 6.1 Sub Exercise 1 Description<a name="subex1"></a>
 
 After completing these steps you will have created...
 
@@ -34,7 +34,7 @@ SELECT * FROM "AIS_DEMO"."GDELT_GEG" WHERE "lang" = 'en';
 
 ![](images/c02_01_0010.png)
 
-## Exercise 6.2 Sub Exercise 2 Description
+## Exercise 6.2 Sub Exercise 2 Description<a name="subex2"></a>
 
 After completing these steps you will have...
 
