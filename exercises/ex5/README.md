@@ -12,7 +12,7 @@ import hana_ml
 ````
 
 
-## Exercise 5.1 Sub Exercise 1 Description<a name="subex1"></a>
+## Exercise 5.1 Load, prepare and explore fuel station datasets<a name="subex1"></a>
 
 After completing these steps you will have created...
 
@@ -26,7 +26,7 @@ response->set_text( |Hello ABAP World! | ).
 
 
 
-## Exercise 5.2 Sub Exercise 2 Description<a name="subex2"></a>
+## Exercise 5.2 Load, prepare and explore fuel price datasets<a name="subex2"></a>
 
 After completing these steps you will have...
 
@@ -44,6 +44,9 @@ READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
 
 2.	Click here.
 <br>![](/exercises/ex5/images/02_02_0010.png)
+
+
+## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
 
 ## Summary
 
