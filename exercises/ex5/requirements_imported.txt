@@ -1,0 +1,11 @@
+pandas==1.1.2
+descartes==1.1.0
+osmnx==0.16.0
+matplotlib==3.5.3
+pyproj==3.2.1
+hdbcli==2.14.18
+pydotplus==2.0.2
+numpy==1.19.5
+graphviz==0.16
+geopandas==0.10.2
+hana-ml==2.14.22091801
