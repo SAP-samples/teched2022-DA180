@@ -31,7 +31,7 @@ Provide the exercise content here directly in README.md using [markdown](https:/
     - [Exercise 4.2 - Exercise 4 Sub Exercise 2 Description](exercises/ex4/README.md#subex2)
 - [Exercise 5 - Apply Forecasting to multi-model data](exercises/ex5/)
     - [Exercise 5.1 - Load, prepare and explore fuel station datasets](exercises/ex5/README.md#exercise-51-load-prepare-and-explore-fuel-station-datasets)
-    - [Exercise 5.2 - Load, prepare and explore fuel price datasets](/exercises/ex5/README.md#exercise-52-load-prepare-and-explore-fuel-price-datasets)
+    - [Exercise 5.2 - Load, prepare and explore fuel price datasets](/exercises/ex5/README.md#subex2)
     - [Exercise 5.3 - Forecast fuel prices](/exercises/ex5/README.md#exercise-53-forecast-fuel-prices)
 - [Exercise 6 - Build a ML classification model on multi-model data](exercises/ex6/)
     - [Exercise 6.1 - Exercise 6 Sub Exercise 1 Description](exercises/ex6/README.md#subex1)
