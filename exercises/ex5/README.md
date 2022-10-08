@@ -1,6 +1,16 @@
 # Exercise 5 - Apply Forecasting to multi-model data
 
 In this exercise, we will create...
+Prepare
+````Python
+
+pip install -r requirements_importet.txt
+import hana_ml
+
+
+
+````
+
 
 ## Exercise 5.1 Sub Exercise 1 Description<a name="subex1"></a>
 
