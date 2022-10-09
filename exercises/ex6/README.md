@@ -132,34 +132,171 @@ stations_spatialhierarchy=stations_spatialhierarchy.rename_columns({'GEOHASH_HIE
 stations_spatialhierarchy.head(2).collect() 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.2.1-stations_patialhierarchy.png)
 
 Text
 ````Python
-import 
+# Import station distance to nearest highway and join with spatial hierarchy data
+stations_hwaydist_pd = pd.read_csv('./stations_hwaydist.csv', sep=',', header=0, skiprows=1,
+                                      names=["idx", "uuid", "HIGHWAY_DISTANCE"],
+                                      usecols=["uuid", "HIGHWAY_DISTANCE"])
+stations_hwaydist2 = create_dataframe_from_pandas(
+        conn,
+        stations_hwaydist_pd,
+        schema='TECHED_USER_999',
+        table_name="GAS_STATION_HWAYDIST",
+        force=True,
+        replace=True,
+        drop_exist_tab=True,
+        table_structure={"uuid": "NVARCHAR(5000)", "HIGHWAY_DISTANCE": "DOUBLE"}
+    )
+display(stations_hwaydist2.head(5).collect())
+
+# Joining distance data with spatial hierachy dataframe 
+stations_spatial_attributes=stations_spatialhierarchy.set_index("uuid").join(stations_hwaydist2.set_index("uuid"))
+display(stations_spatial_attributes.collect()) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.2.2-stations_spatial_distance.png)
 
-````
 
-STEP 1 -	Click here.
 Text
 ````Python
-import 
+# Create station spatial dataframe joining spatial hierachy and regions attributes
+regions_hdf = conn.table("GEO_GERMANY_REGIONS")
+
+# Joins regions and stations via HANA spatial join-function
+stations_spatial = stations_spatial_hierarchy.join(regions_hdf.select('lan_name','krs_name','krs_type','SHAPE'), 
+       '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1')
+
+stations_spatial.drop('SHAPE').head(5).collect() 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.2.3-stations_spatial_attributes.png)
 
-Text
-````Python
-import 
-
-````
-<br>![](/exercises/ex6/images/02_019_0010.png)
 
 
 ## Exercise 6.3 Build fuel station classification model and evaluate impact of attributes<a name="subex3"></a>
+
+
+STEP 1 -	Click here.
+
+Text
+````Python
+#Save station attributes dataframes to temporary HANA tables
+stations_class.drop('E5_AVG').save('#STATION_CLASS', force=True)
+station_master.save('#STATION_MASTER', force=True)
+stations_price_indicators.save('#STATION_PRICE_INDICATORS', force=True)
+stations_spatial.drop('longitude_latitude_GEO').drop('SHAPE').save('#STATION_SPATIAL', force=True) 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+# Build the classification training data HANA dataframe
+stations_priceclass=conn.sql(
+"""
+SELECT M."uuid", "brand", "post_code", "post_code2", "city", 
+       "longitude", "latitude", "GEO_H3", "GEO_H4", "GEO_H5", "GEO_H6", "GEO_H7", "lan_name", "krs_name", "krs_type",
+       S.HIGHWAY_DISTANCE,
+       "MIN_E5C", "MAX_E5C", "STDEV_E5C", "RANGE_E5C", "AVG_E5_VAR",  
+       "STATION_CLASS"
+   From #STATION_MASTER as M,
+        #STATION_SPATIAL as S,
+        #STATION_PRICE_INDICATORS as PI,
+        #STATION_CLASS as C
+    Where M."uuid"=PI."station_uuid" AND 
+          M."uuid"=S."uuid" AND
+          M."uuid"=C."station_uuid";
+"""
+)
+stations_priceclass.head(3).collect()
+#print(stations_priceclass.columns)
+
+````
+<br>![](/exercises/ex6/images/6.3.1-price_class_dataset.png )
+
+
+Text
+````Python
+# Save station classification dataset to HANA column table
+stations_priceclass.save('STATION_PRICECLASSIFICATION', force=True)
+
+gas_station_class_base = conn.table("STATION_PRICECLASSIFICATION", schema="TECHED_USER_999")
+gas_station_class_base.head(5).collect() 
+
+````
+<br>![](/exercises/ex6/images/6.3.2-price_class_basetable.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+
+## Reference info OSMNX import
+
 
 ## Summary
 
