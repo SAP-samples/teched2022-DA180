@@ -256,6 +256,8 @@ timeseries_box_plot(data=fuelprice_sample, col="e5", key="date", cycle="MONTH")
 
 ## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
 
+Step 1 - Select price data for local region
+
 ````Python
 # Refelect number of service stations in local regrion close to SAP HQ
 print("Number of Serice Stations in the Rhein-Neckar area", stations_rnk_hdf.count(), "\n")
@@ -307,35 +309,80 @@ print('Number of forecast testing rows', test_rnk_hdf.count())
 ````
 <br>![](/exercises/ex5/images/5.3.3-price_fc_rows.png)
 
-````Python
-import 
 
+Step 2 - Model fuel price forecast
+
+````Python
+# Prepare holiday data table (for simplicity an empty table) for the forecast model function
+conn.create_table(
+    table='PAL_ADDITIVE_MODEL_ANALYSIS_HOLIDAY',
+    schema='TECHED_USER_999',
+    table_structure={'GROUP_IDXXX': 'INTEGER', 'ts': 'TIMESTAMP', 'NAME': 'VARCHAR(255)', 
+                     'LOWER_WINDOW': 'INTEGER', 'UPPER_WINDOW': 'INTEGER'})
+holiday_data_hdf = conn.sql('select * from "TECHED_USER_999"."PAL_ADDITIVE_MODEL_ANALYSIS_HOLIDAY"')
 ````
 <br>![](/exercises/ex5/images/02_02_0010.png)
 
 ````Python
-import 
+# Build a forecast model per station in parallel using PAL Additive Model Forecast (aka Prophet)-forecasting function
+from hana_ml.algorithms.pal.tsa.additive_model_forecast import AdditiveModelForecast
+
+amf = AdditiveModelForecast(massive=True,growth='linear',
+                                changepoint_prior_scale=0.06,
+                                weekly_seasonality='True',
+                                daily_seasonality='True'
+                                )
+
+amf.fit(data=train_rnk_hdf, key="date", group_key="station_uuid", holiday=holiday_data_hdf)
+
+amf.runtime 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.4-fit_runtime.png)
 
 ````Python
-import 
+# Which SQL statement was actually executed in SAP HANA?
+
+#print(conn.last_execute_statement)
+print(amf.get_fit_execute_statement()) 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.5-fit_SQLstatement.png)
 
 ````Python
-import 
+# How do the AdditiveModelAnalysis segmented model look like?
+pd.set_option('max_colwidth', None)
+df=amf.model_.head(5).collect()
+
+display(df.style.set_properties(**{'text-align': 'left'})) 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.6-fitted_models.png)
 
 ````Python
-import 
+# Filter errornous test data
+test_rnk_hdf=test_rnk_hdf.filter('"station_uuid" not in (\'3ec1e50e-aba5-436c-960a-423b2b8a37ed\', \'51d4b58a-a095-1aa0-e100-80009459e03a\')')
+
+# predict returns an array of three dataframes. The first contains the forecasted values
+fc_result, fc_decomp, fc_error = amf.predict(data=test_rnk_hdf, key="date", group_key="station_uuid")
+
+#print(amf.get_predict_execute_statement())
+
+# look at forecast result data
+display(fc_result.head(3).collect(), "\n")
+
+# Look the time series decomposition result data
+fc_decomp.head(3).collect()
+
+# Check for errors in any of the station_uuids
+fc_error.head(3).collect() 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.7-forecast_prediction.png)
+<br>![](/exercises/ex5/images/5.3.8-forecast_pred_decomp.png)
+<br>![](/exercises/ex5/images/5.3.9-forecast_pred_error.png)
+
+Step 3 - Analyse Forecast Accuracy
 
 ````Python
 import 
