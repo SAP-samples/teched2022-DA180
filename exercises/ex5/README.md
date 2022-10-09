@@ -254,7 +254,7 @@ timeseries_box_plot(data=fuelprice_sample, col="e5", key="date", cycle="MONTH")
 ````
 <br>![](/exercises/ex5/images/5.2.8-price_timeseries_boxplot.png)
 
-## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
+## Exercise 5.3 Forecast fuel prices <a name="subex3"></a>
 
 Step 1 - Select price data for local region
 

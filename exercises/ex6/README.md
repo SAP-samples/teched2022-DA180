@@ -97,24 +97,12 @@ Text
 ````Python
 # Drop high correlated indicator columns
 stations_price_indicators=stations_price_indicators.drop('AVG_E5_MIN').drop('AVG_E5_MAX').drop('SUM_E5C').drop('AVG_E5C')
+stations_price_indicators=stations_price_indicators.drop('AVG_E5_STD').drop('SUM_E5_RANGE').drop('AVG_E5_RANGE')
 stations_price_indicators.head(3).collect() 
 
 ````
 <br>![](/exercises/ex6/images/6.1.5-stations_price_indicators_fin.png)
 
-Text
-````Python
-import 
-
-````
-<br>![](/exercises/ex6/images/02_019_0010.png)
-
-Text
-````Python
-import 
-
-````
-<br>![](/exercises/ex6/images/02_019_0010.png)
 
 
 
@@ -123,20 +111,53 @@ import
 
 After completing these steps you will have...
 
-1.	Enter this code.
-```abap
-DATA(lt_params) = request->get_form_fields(  ).
-READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
-  IF sy-subrc = 0.
-    response->set_status( i_code = 200
-                     i_reason = 'Everything is fine').
-    RETURN.
-  ENDIF.
+STEP 1 -	Enter this code.
+Text
+````Python
+# Create a station spatial hierarchy HANA dataframe
+stations_spatialhierarchy = stations_hdf.select('uuid', 'longitude','latitude','longitude_latitude_GEO')
 
-```
+# Derive spatial hierarchy features from station point location
+stations_spatialhierarchy =stations_spatialhierarchy.generate_feature(targets='longitude_latitude_GEO', 
+                                                          trans_func='GEOHASH_HIERARCHY', trans_param=range(3,8))
 
-2.	Click here.
-<br>![](/exercises/ex6/images/02_02_0010.png)
+# Rename columns
+stations_spatialhierarchy=stations_spatialhierarchy.rename_columns({'GEOHASH_HIERARCHY(longitude_latitude_GEO,3)': 'GEO_H3', 
+                                                                    'GEOHASH_HIERARCHY(longitude_latitude_GEO,4)': 'GEO_H4', 
+                                                                    'GEOHASH_HIERARCHY(longitude_latitude_GEO,5)': 'GEO_H5',
+                                                                    'GEOHASH_HIERARCHY(longitude_latitude_GEO,6)': 'GEO_H6',
+                                                                    'GEOHASH_HIERARCHY(longitude_latitude_GEO,7)': 'GEO_H7'}
+                                                                      )
+
+stations_spatialhierarchy.head(2).collect() 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+````
+
+STEP 1 -	Click here.
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
+Text
+````Python
+import 
+
+````
+<br>![](/exercises/ex6/images/02_019_0010.png)
+
 
 ## Exercise 6.3 Build fuel station classification model and evaluate impact of attributes<a name="subex3"></a>
 
