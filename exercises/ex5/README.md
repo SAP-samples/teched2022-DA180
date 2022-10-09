@@ -257,6 +257,93 @@ timeseries_box_plot(data=fuelprice_sample, col="e5", key="date", cycle="MONTH")
 ## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
 
 ````Python
+# Refelect number of service stations in local regrion close to SAP HQ
+print("Number of Serice Stations in the Rhein-Neckar area", stations_rnk_hdf.count(), "\n")
+
+# Create a fuel price data HANA dataframe, filtering to local area stations using HANA spatial intersect-filtering
+fuelprice_rnk_hdf=conn.sql(
+"""
+select "date", "station_uuid", "e5" 
+    from "GAS_PRICES" 
+    WHERE "station_uuid" 
+         IN (SELECT "uuid" 
+              FROM (SELECT * FROM "GAS_STATIONS") AS S, 
+                   (SELECT * FROM "GEO_GERMANY_REGIONS" 
+                    WHERE "krs_name"=\'Landkreis Rhein-Neckar-Kreis\' or "krs_name"=\'Stadtkreis Heidelberg\' 
+                          or "krs_name"=\'Stadtkreis Mannheim\' ) AS G 
+              WHERE "longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1);
+"""
+)
+display(fuelprice_rnk_hdf.collect()) 
+
+````
+<br>![](/exercises/ex5/images/5.3.1-price_data_region_rnk.png)
+
+````Python
+print( "The dataset covers the time period starting from: ")
+print( fuelprice_rnk_hdf.sort('date').select('date').head(1).collect(), "\n")
+print( "... and ends at: ")
+print( fuelprice_rnk_hdf.sort('date', desc=True).select('date').head(1).collect()) 
+
+````
+<br>![](/exercises/ex5/images/5.3.2-price_fc_timeperiod.png)
+
+````Python
+# in order to predict the last 7 days, we restict our training data to be earlier than 2022-09-23
+train_rnk_hdf  = fuelprice_rnk_hdf.filter('"date" < \'2022-09-23 00:00:00.000\'')
+
+# ground truth
+test_groundtruth_rnk_hdf  = fuelprice_rnk_hdf.filter('"date" >= \'2022-09-23 00:00:00.000\'')
+
+# create test dataset, same as ground truth only target column values set to 0
+test_rnk_hdf = test_groundtruth_rnk_hdf.drop(['e5'])
+test_rnk_hdf = test_rnk_hdf.add_constant('e5', 0)
+test_rnk_hdf = test_rnk_hdf.cast('e5', 'DOUBLE')
+
+#test_groundtruth_rnk_hdf.sort('date').head(3).collect()
+print('Number of forecast training rows', train_rnk_hdf.count())
+print('Number of forecast testing rows', test_rnk_hdf.count()) 
+
+````
+<br>![](/exercises/ex5/images/5.3.3-price_fc_rows.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
+import 
+
+````
+<br>![](/exercises/ex5/images/02_02_0010.png)
+
+````Python
 import 
 
 ````
