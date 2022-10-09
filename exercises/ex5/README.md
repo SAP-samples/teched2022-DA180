@@ -382,19 +382,119 @@ fc_error.head(3).collect()
 <br>![](/exercises/ex5/images/5.3.8-forecast_pred_decomp.png)
 <br>![](/exercises/ex5/images/5.3.9-forecast_pred_error.png)
 
-Step 3 - Analyse Forecast Accuracy
+Step 3 - Analyse Forecast Accuracy and Forecasts Plots
 
 ````Python
-import 
+# Create a Forecast accuracy-measures table
+conn.create_table(table='FORECAST_ACCURACY',schema='TECHED_USER_999', 
+                 table_structure={'station_uuid': 'NVARCHAR(5000)', 'STAT_NAME': 'NVARCHAR(10)', 'STAT_VALUE': 'DOUBLE'})
+fc_acc=conn.table('FORECAST_ACCURACY')
+fc_acc.count() 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.10-fc_acc_table.png)
 
 ````Python
-import 
+# Comparing predicted Forecast with observed ground-truth e5-values of the test data time period
+
+# predicted forecast
+fc_allgroups=fc_result.select('date', 'GROUP_ID', 'YHAT', 'YHAT_LOWER', 'YHAT_UPPER').rename_columns({'YHAT': 'PREDICTED'})
+#display(fc_allgroups.head(2).collect())
+
+# actual groundthruth
+act_allgroups=test_groundtruth_rnk_hdf.sort('date', desc=True).rename_columns({'e5': 'ACTUAL'})
+#display(act_allgroups.head(2).collect())
+
+# combined actual and predicted values
+testacc_allgroups=act_allgroups.alias('A').join(fc_allgroups.alias('F'), 
+          'A."station_uuid"=F."GROUP_ID" and A."date" = F."date"',
+          select=['station_uuid', ('A."date"', 'DATE'), 'ACTUAL', 'PREDICTED']).sort('DATE')
+testacc_allgroups=testacc_allgroups.sort('DATE')
+#print(testacc_allgroups.select_statement)
+display(testacc_allgroups.head(10).collect()) 
 
 ````
-<br>![](/exercises/ex5/images/02_02_0010.png)
+<br>![](/exercises/ex5/images/5.3.11-fc_acc_inputdata.png)
+
+````Python
+# Get alls stations uuids into a list
+df=testacc_allgroups.distinct('station_uuid').collect()
+stations_all=list(set(list(df['station_uuid'])))
+#print(stations_all)
+
+# Calculate Forecast Accuracy Measure for each station 
+from hana_ml.algorithms.pal.tsa.accuracy_measure import accuracy_measure
+amres = {}
+for station in stations_all:
+    amres[station] = accuracy_measure(data=testacc_allgroups.filter('"station_uuid"=\'{}\''.format(station)
+                                                                   ).select(['ACTUAL', 'PREDICTED']),
+                                      evaluation_metric=['mse', 'rmse', 'mpe', 'et',
+                                                         'mad', 'mase', 'wmape', 'smape',
+                                                         'mape'])
+   
+    amres[station]=amres[station].select(('\'{}\''.format(station),'station_uuid'), 'STAT_NAME', 'STAT_VALUE')
+    amres[station].save('FORECAST_ACCURACY', append=True)
+    
+fc_acc.collect() 
+
+````
+<br>![](/exercises/ex5/images/5.3.12-fc_acc_results.png)
+
+````Python
+#Visually evaluate a specific station
+station='018e8f3e-ae2f-40bc-89c1-bc3fe20eb462'
+
+# Filter forecast train data (actuals) for station
+act_train_1s=train_rnk_hdf.filter('"station_uuid" = \'{}\''.format(station)).sort('date', desc=False)
+act_train_1s=act_train_1s.drop('station_uuid').rename_columns({'e5': 'ACTUAL'})
+#act_train_1s.head(2).collect()
+
+# Filter test data ground thruth (actuals) for station
+act_gt_1s=test_groundtruth_rnk_hdf.filter('"station_uuid" = \'{}\''.format(station)).sort('date', desc=False)
+act_gt_1s=act_gt_1s.drop('station_uuid').rename_columns({'e5': 'E5_ACTUAL'})
+#act_gt_1s.head(2).collect()
+
+# Union actuals into one set
+actual_1s=act_train_1s.union(act_gt_1s).sort('date')
+display(actual_1s.head(10).collect())
+
+# Filter forecast predictions
+forecast_1s=fc_result.filter('"GROUP_ID" = \'{}\''.format(station)).sort('date', desc=False)
+forecast_1s=forecast_1s.select('date', 'YHAT', 'YHAT_LOWER', 'YHAT_UPPER').rename_columns({'YHAT': 'PREDICTED'})
+display(forecast_1s.head(2).collect()) 
+
+````
+<br>![](/exercises/ex5/images/5.3.13-fc_plot_input.png)
+
+````Python
+# Forecast-Lineplot for the complete period
+from hana_ml.visualizers.visualizer_base import forecast_line_plot
+ax = forecast_line_plot(actual_data=actual_1s.set_index("date"),
+                        pred_data=forecast_1s.set_index("date"),                
+                    confidence=("YHAT_LOWER", "YHAT_UPPER"),
+                    max_xticklabels=10, figsize=(15, 7))
+
+ax.set_title('Fuel Price Actual and Forecast', pad=20)
+plt.ylabel('Gas Price e5 [€]')
+plt.show() 
+
+````
+<br>![](/exercises/ex5/images/5.3.14-fc_plot_all.png)
+
+````Python
+# Forecast-Lineplot for the last 3 weeks of data
+from hana_ml.visualizers.visualizer_base import forecast_line_plot
+ax = forecast_line_plot(pred_data=forecast_1s.set_index("date"),
+                    actual_data=actual_1s.filter('"date" >= \'2022-09-07 00:00:00.000\'').set_index("date"),
+                    confidence=("YHAT_LOWER", "YHAT_UPPER"),
+                    max_xticklabels=10, figsize=(15, 8))
+
+ax.set_title('Fuel Price Actual and Forecast', pad=20)
+plt.ylabel('Gas Price e5 [€]')
+plt.show() 
+
+````
+<br>![](/exercises/ex5/images/5.3.15-fc_plot_last.png)
 
 ## Summary
 
