@@ -86,6 +86,57 @@ print("Number of Serice Stations in the Rhein-Neckar area", stations_rnk_hdf.cou
 The following result will be presented
 <br>![](/exercises/ex5/images/5.1.3-spatialfilterstations_res.png)
 
+4. Visualize stations on map in Python.
+
+````Python
+# filter service stations in Germany to those NOT within the "Rhein-Neckar-Kreis"-region
+stations_GER_hdf = stations_hdf.join(regions_hdf, 
+ '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1').filter(
+ "\"krs_name\"!='Landkreis Rhein-Neckar-Kreis' AND \"krs_name\"!='Stadtkreis Heidelberg' AND \"krs_name\"!='Stadtkreis Mannheim'"
+ )
+
+# number of service stations in Germany, excluding the ones selected around the SAP Headquarters and area
+print("Number of Service Stations in Germany, excluding the one in 'Rhein-Neckar-Kreis'-region",stations_GER_hdf.count()) 
+
+````
+The following result will be presented
+<br>![](/exercises/ex5/images/5.1.4-stationsGER_res.png)
+
+````Python
+# Collecting the HANA dataframe fuel stations point location spatial data for visualization into geopandas dataframes
+stations_rnk_pd = stations_rnk_hdf.collect()
+stations_rnk_geopands = gpd.GeoDataFrame(
+    stations_rnk_pd, geometry=gpd.points_from_xy(stations_rnk_pd.longitude, stations_rnk_pd.latitude))
+
+stations_GER_pd = stations_GER_hdf.collect()
+stations_GER_geopands = gpd.GeoDataFrame(
+    stations_GER_pd, geometry=gpd.points_from_xy(stations_GER_pd.longitude, stations_GER_pd.latitude))
+
+# Collecting the HANA dataframe Germany region sspatial data for visualization into a geopandas dataframe
+regions_pd = regions_hdf.collect()
+regions_geopands = gpd.GeoDataFrame(regions_pd, geometry='SHAPE') 
+
+````
+
+````Python
+#Plot gepandas dataframes 
+fig, ax = plt.subplots(figsize=(12,12))
+ax.set_xlim((5,16))
+ax.set_ylim((47,55.5))
+
+regions_geopands.plot(ax=ax, facecolor='Grey', edgecolor='k')
+stations_GER_geopands.plot(ax=ax, marker='.',  color='blue', markersize=4, label='fuel stations in Germany ')
+stations_rnk_geopands.plot(ax=ax, marker='.',  color='red', markersize=4, label='fuel stations near SAP HQ region')
+
+ax.legend()
+ax.set_title('Fuel Service Stations in Germany', pad=20)
+fig = ax.get_figure()
+fig.tight_layout()
+
+````
+The following result will be presented
+<br>![](/exercises/ex5/images/5.1.5-stationsGER_plot.png)
+
 ## Exercise 5.2 Load, prepare and explore fuel price datasets<a name="subex2"></a>
 
 ````Python
