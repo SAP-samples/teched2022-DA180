@@ -139,30 +139,128 @@ The following result will be presented
 
 ## Exercise 5.2 Load, prepare and explore fuel price datasets<a name="subex2"></a>
 
+After completing these steps you will have...
+Download September fuel price data from [here](https://dev.azure.com/tankerkoenig/_git/tankerkoenig-data?path=/prices/2022/09) or or for your convevience, find a copy in this github ./data/fuelprice/  
+Use ZIP-download like  and then extract the ZIP-file to your local ./datasets/-directory
+<br>![](/exercises/ex5/images/5.2.0-download_fuelpricedata.png)
+
+1.	Use this ...
+````Python
+# retrieve hana fuel price csv-file name into a Python list
+mypath='./datasets/09/09'
+from os import listdir
+from os.path import isfile, join
+pricefiles = [f for f in listdir(mypath) if isfile(join(mypath, f))]
+#pricefiles
+
+# load fuel price data for the 
+gp_tmp_pd = {}
+for file in pricefiles:
+    gp_tmp_pd[file] = pd.read_csv('./datasets/09/09/{}'.format(file), sep=',', header=0, skiprows=1,
+                                      names=["date", "station_uuid", "diesel", "e5", "e10", "dieselchange", "e5change", "e10change"],
+                                      usecols=["date", "station_uuid", "diesel", "e5", "e10", "dieselchange", "e5change", "e10change"])
+    gasprices_hdf = create_dataframe_from_pandas(
+        conn, gp_tmp_pd[file],
+        schema='TECHED_USER_###', table_name="GAS_PRICES",
+        append=True)
+    
+# Show row count for uploaded fuel price data
+gasprices_hdf.count()
+````
+<br>![](/exercises/ex5/images/5.2.1-priceupload_info.png)
+<br>![](/exercises/ex5/images/5.2.2-price_rowcount.png)
+
+
+2.	Analyse and explore the fuel price data from Python
+
+````Python
+# create hana dataframe including all gas prices in Germany in 2022 uploaded
+fuelprice_all_hdf = conn.sql('select * from "GAS_PRICES"')
+
+print("There are", fuelprice_all_hdf.count(), "records in the dataset", "\n")
+
+fuelprice_all_hdf.sort('date', desc=True).head(3).collect()
+
+````
+<br>![](/exercises/ex5/images/5.2.3-pricedata_loaded.png)
+
+````Python
+# Selecting columns in focus
+fuelprice_all_hdf=fuelprice_all_hdf.select('date', 'station_uuid', 'e5')
+#display(fuelprice_all_hdf.head(3).collect())
+
+# Count the price changes per fuel service station
+display(fuelprice_all_hdf.agg([('count', 'e5', 'N')], group_by='station_uuid').collect())
+
+````
+<br>![](/exercises/ex5/images/5.2.4-pricechange_station.png)
+
+````Python
+# Show e5 value distribution to identify outlier data ranges
+
+# Distribution Histogram (incl. binnning)
+from hana_ml.visualizers.eda import EDAVisualizer
+f = plt.figure(figsize=(8,3))
+ax1 = f.add_subplot(111)
+
+eda = EDAVisualizer(ax1)
+ax, dist_data = eda.distribution_plot( data=fuelprice_all_hdf, column="e5", bins=50, 
+                                      title="Distribution of E5 prices", debrief=False)
+plt.show()
+
+````
+<br>![](/exercises/ex5/images/5.2.5-price_dist_plot.png)
+
+````Python
+# Filter outliers
+fuelprice_all_hdf=fuelprice_all_hdf.filter('"e5" > 1.3 and "e5"< 2.8')
+
+# Distribution Histogram (incl. binnning)
+from hana_ml.visualizers.eda import EDAVisualizer
+f = plt.figure(figsize=(8,3))
+ax1 = f.add_subplot(111)
+
+eda = EDAVisualizer(ax1)
+ax, dist_data = eda.distribution_plot( data=fuelprice_all_hdf, column="e5", bins=30, 
+                                      title="Distribution of E5 prices", debrief=False)
+plt.show()
+
+````
+<br>![](/exercises/ex5/images/5.2.6-price_dist_plot2.png)
+
+````Python
+# M4 sampling and time series plot
+%matplotlib inline
+from hana_ml.visualizers.m4_sampling import m4_sampling
+fuelprice_sample=m4_sampling(fuelprice_all_hdf.select('date', 'e5'), 200)
+#fuelprice_sample.head(6).collect()
+
+fuelprice_sample_pd=fuelprice_sample.collect()
+fuelprice_sample_pd.set_index(fuelprice_sample_pd.columns[0], inplace=True)
+fuelprice_sample_pd.sort_index(inplace=True)
+fuelprice_sample_pd=fuelprice_sample_pd.astype(float)
+#ax.set_ylim((1.3,2.8))
+ax = fuelprice_sample_pd.plot(figsize=(20,8))
+
+````
+<br>![](/exercises/ex5/images/5.2.7-price_timeseries_plot.png)
+
+````Python
+# timeseries_box_plot
+from hana_ml.visualizers.eda import timeseries_box_plot
+f = plt.figure(figsize=(20, 6))
+timeseries_box_plot(data=fuelprice_sample, col="e5", key="date", cycle="MONTH")
+
+````
+<br>![](/exercises/ex5/images/5.2.8-price_timeseries_boxplot.png)
+
+## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
+
 ````Python
 import 
 
 ````
-
-After completing these steps you will have...
-
-1.	Enter this code.
-```abap
-DATA(lt_params) = request->get_form_fields(  ).
-READ TABLE lt_params REFERENCE INTO DATA(lr_params) WITH KEY name = 'cmd'.
-  IF sy-subrc = 0.
-    response->set_status( i_code = 200
-                     i_reason = 'Everything is fine').
-    RETURN.
-  ENDIF.
-
-```
-
-2.	Click here.
 <br>![](/exercises/ex5/images/02_02_0010.png)
-
-
-## Exercise 5.3 Forecast fuel prices<a name="subex3"></a>
 
 ## Summary
 
