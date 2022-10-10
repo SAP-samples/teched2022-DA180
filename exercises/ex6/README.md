@@ -226,77 +226,179 @@ stations_priceclass.save('STATION_PRICECLASSIFICATION', force=True)
 
 gas_station_class_base = conn.table("STATION_PRICECLASSIFICATION", schema="TECHED_USER_999")
 gas_station_class_base.head(5).collect() 
-
+#print(gas_station_class_base.columns)
 ````
 <br>![](/exercises/ex6/images/6.3.2-price_class_basetable.png)
 
 
 Text
 ````Python
-import 
+# Split the station classification dataframe into a training and test subset
+from hana_ml.algorithms.pal.partition import train_test_val_split
+df_train, df_test, _ = train_test_val_split(data=gas_station_class_base, id_column='uuid',
+                                            random_seed=2, partition_method='stratified', stratified_column='STATION_CLASS',
+                                            training_percentage=0.75,
+                                            testing_percentage=0.25,
+                                            validation_percentage=0)
+
+df_train.describe().collect()
+#print(df_train.describe().select_statement) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.3-price_train_describe.png)
 
 
 Text
 ````Python
-import 
+# Train the Station classifer model using PAL HybridGradientBoostingTree
+
+from hana_ml.algorithms.pal.unified_classification import UnifiedClassification
+
+# Define the model object 
+hgbc = UnifiedClassification(func='HybridGradientBoostingTree',
+                            n_estimators = 100, split_threshold=0.1,
+                          learning_rate=0.5,
+          fold_num=5, max_depth=5,
+          evaluation_metric = 'error_rate', ref_metric=['auc'])
+
+# Execute the training of the model
+hgbc.fit(data=gas_station_class_base, key= 'uuid',
+         label='STATION_CLASS', ntiles=20, impute=True, build_report=True)
+
+display(hgbc.runtime)
+
+# Explore the feature importance result
+display(hgbc.importance_.sort('IMPORTANCE', desc=True).collect().set_index('VARIABLE_NAME')) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.4-feature_importance.png)
 
 
 Text
 ````Python
-import 
+# Test model generalization using the test data-subset, not used during training
+scorepredictions, scorestats, scorecm, scoremetrics = hgbc.score(data=df_test , key= 'uuid', label='STATION_CLASS', 
+                                                                 ntiles=20, impute=True)
+#display(hgbc.runtime)
+display(scorestats.sort('CLASS_NAME').collect())
+display(scorecm.filter('COUNT != 0').collect())
+display(scoremetrics.collect()) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.5-score_stats.png)
+<br>![](/exercises/ex6/images/6.3.6-score_cm_cummetrics.png)
 
 
 Text
 ````Python
-import 
+# Explore test data-subset predictions applying the trained model
+features = df_test.columns
+features.remove('STATION_CLASS')
+features.remove('uuid')
+
+# Using the predict-method with our model object hgbc
+pred_res = hgbc.predict(df_test, key='uuid', features=features, impute=True )
+
+#display(hgbc.runtime)
+
+# Review the predicted results
+pd.set_option('max_colwidth', None)
+pred_res.select('uuid', 'SCORE', 'CONFIDENCE', 'REASON_CODE', 
+                ('json_query("REASON_CODE", \'$[0].attr\')', 'Top1'), 
+                ('json_query("REASON_CODE", \'$[0].pct\')', 'PCT_1') ).head(3).collect() 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.7-pred_results.png)
 
 
 Text
 ````Python
-import 
+#  Show the distribution of the impacts each feature has on the model output using Shapley ML explainability values 
+import pydotplus
+import graphviz
+from hana_ml.visualizers.model_debriefing import TreeModelDebriefing
+
+shapley_explainer = TreeModelDebriefing.shapley_explainer(pred_res, df_test, key='uuid', label='STATION_CLASS')
+shapley_explainer.summary_plot() 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.8-shapley_global.png)
 
 
 Text
 ````Python
-import 
+# Show the "local" distribution impact of each feature for individual predictions 
+shapley_explainer = TreeModelDebriefing.shapley_explainer(pred_res.head(5), df_test.head(5), 
+                                                          key='uuid', label='STATION_CLASS')
+shapley_explainer.force_plot() 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.9-shapley_local.png)
 
 
 Text
 ````Python
-import 
+# Save Models and Model Quality Information to MLLAB-Sandbox
+from hana_ml.model_storage import ModelStorage
+
+MLLAB_models = ModelStorage(connection_context=conn)
+
+hgbc.name = 'STATION PRICE-CLASS CLASSIFIER MODEL' 
+hgbc.version = 1
+
+MLLAB_models.save_model(model=hgbc) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+
 
 
 Text
 ````Python
-import 
+# Retrieve model from ModelStorage location
+from hana_ml.model_storage import ModelStorage
+MLLAB_models = ModelStorage(connection_context=conn)
+
+list_models = MLLAB_models.list_models()
+display(list_models) 
 
 ````
-<br>![](/exercises/ex6/images/02_019_0010.png)
+<br>![](/exercises/ex6/images/6.3.10-modelstorage_listmodel.png)
 
+
+Text
+````Python
+# Reload model from ModelStorage
+mymodel = MLLAB_models.load_model('STATION PRICE-CLASS CLASSIFIER MODEL', 1)
+
+# Predict with reloaded model
+pred_results=mymodel.predict(data=df_test, key='uuid', features=features, impute=True)
+
+# Build Model Report
+from hana_ml.visualizers.unified_report import UnifiedReport
+UnifiedReport(mymodel).build().display() 
+
+````
+<br>![](/exercises/ex6/images/6.3.11-modelreport_varimportance.png)
+
+
+Text
+````Python
+# CleanUp Model Storage
+MLLAB_models.delete_models(name='STATION PRICE-CLASS CLASSIFIER MODEL')
+MLLAB_models.clean_up() 
+
+````
+
+
+<br>![](/exercises/ex6/images/02_019_0010.png)
 
 ## Reference info OSMNX import
 
+Text
+````Python
+import 
+
+````
 
 ## Summary
 
