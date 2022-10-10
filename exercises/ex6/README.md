@@ -262,7 +262,7 @@ hgbc = UnifiedClassification(func='HybridGradientBoostingTree',
           evaluation_metric = 'error_rate', ref_metric=['auc'])
 
 # Execute the training of the model
-hgbc.fit(data=gas_station_class_base, key= 'uuid',
+hgbc.fit(data=df_train, key= 'uuid',
          label='STATION_CLASS', ntiles=20, impute=True, build_report=True)
 
 display(hgbc.runtime)
