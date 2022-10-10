@@ -262,7 +262,7 @@ hgbc = UnifiedClassification(func='HybridGradientBoostingTree',
           evaluation_metric = 'error_rate', ref_metric=['auc'])
 
 # Execute the training of the model
-hgbc.fit(data=gas_station_class_base, key= 'uuid',
+hgbc.fit(data=df_train, key= 'uuid',
          label='STATION_CLASS', ntiles=20, impute=True, build_report=True)
 
 display(hgbc.runtime)
@@ -392,18 +392,167 @@ MLLAB_models.clean_up()
 
 <br>![](/exercises/ex6/images/02_019_0010.png)
 
-## Reference info OSMNX import
+## Reference section - Use OSMNX to import German Highway network and calculate spatial distance btw station and next highway<a name="subex6.4"></a>
+
+OSMnx is a Python package that lets you download geospatial data from OpenStreetMap and model, project, visualize, and analyze real-world street networks and any other geospatial geometries. You can download and model walkable, drivable, or bikeable urban networks with a single line of Python code then easily analyze and visualize them. You can just as easily download and work with other infrastructure types, amenities/points of interest, building footprints, elevation data, street bearings/orientations, and speed/travel time.See https://osmnx.readthedocs.io/en/stable/index.html for reference details.
 
 Text
 ````Python
-import 
+%%time
+import osmnx as ox
+# !!careful, downloading the german highway network via OSMNX takes multiple hours
+# If you want to try this out, try out the next step instead download the highway network for a single region
+
+# Use OSMNX-method to download network graph from "place"
+ox.config(use_cache=True, log_console=True)
+cf = '["highway"~"motorway"]'
+#g =  ox.graph_from_place('Germany', network_type = 'drive', custom_filter=cf) 
 
 ````
+
+Text
+````Python
+
+%%time
+import osmnx as ox
+hdf_RNK_SHAPE = stations_spatial.filter("\"krs_name\"='Landkreis Rhein-Neckar-Kreis'" ).select('uuid','krs_name', 'SHAPE').head(1)
+display(hdf_RNK_SHAPE.drop('SHAPE').collect())
+
+# Create Geopandas Dataframe from the HANA dataframe
+gdf_RNK_SHAPE = gpd.GeoDataFrame(hdf_RNK_SHAPE.select('uuid', 'SHAPE').collect(), geometry='SHAPE')
+gdf_RNK_SHAPE=gdf_RNK_SHAPE.rename_geometry('geometry')
+display(gdf_RNK_SHAPE.head(10))
+
+# Use OSMNX-method to download network graph from polygon
+ox.config(use_cache=True, log_console=True)
+cf = '["highway"~"motorway"]'
+g = ox.graph_from_polygon(polygon = gdf_RNK_SHAPE['geometry'][0], network_type = 'drive',custom_filter=cf)
+#fig, ax = ox.plot_graph(g, fig_height=5) 
+
+````
+Text
+````Python
+# Check successful object download
+g
+
+# Plot OSMNX highway network graph data
+fig, ax = ox.plot_graph(g)
+
+````
+<br>![](/exercises/ex6/images/6.2.4-osmx_highway_plot.png)
+
+Text
+````Python
+# Create geodataframes from network graph
+gdf_nodes,gdf_edges = ox.graph_to_gdfs(g, nodes=True, edges=True)
+gdf_edges
+
+
+````
+<br>![](/exercises/ex6/images/6.2.5-gdf_edges.png)
+
+Text
+````Python
+# Convert network arrays to str-column format for the pandas dataframe
+gdf_edges['ID'] = np.arange(len(gdf_edges))
+gdf_edges['osmid']=gdf_edges['osmid'].astype(str)
+gdf_edges['ref']=gdf_edges['ref'].astype(str)
+gdf_edges['highway']=gdf_edges['highway'].astype(str)
+
+# Create a pandas dataframe, needed for the HANA dataframe import
+pd_edges=pd.DataFrame(gdf_edges, copy=True)[['ID', 'osmid', 'geometry', 'highway','ref']]
+pd_edges.head(5)
+````
+<br>![](/exercises/ex6/images/6.2.6-pd_edges.png)
+
+
+Text
+````Python
+# Create a HANA dataframe from the German highway-network edges pandas dataframe 
+from hana_ml.dataframe import create_dataframe_from_pandas
+
+hdf = create_dataframe_from_pandas(
+    connection_context=conn, replace=True,
+    pandas_df=pd_edges,
+    geo_cols=["geometry"],
+    srid=4326,
+    schema='TECHED_USER_999',
+    table_name="GEO_GERMANY_HIGHWAYS", primary_key='ID'
+    , drop_exist_tab=True, force=True)
+
+german_highways = conn.sql('select * from "TECHED_USER_999"."GEO_GERMANY_HIGHWAYS"')
+german_highways.head(3).collect()
+
+````
+<br>![](/exercises/ex6/images/6.2.7-german_highway_edges_hdf.png)
+
+Text
+````Python
+# Prepare a list of all krs_mame values for the distance calculation
+df=stations_spatial.distinct('krs_name').collect()
+krs=list(set(list(df['krs_name'])))
+print(sorted(krs))
+````
+<br>![](/exercises/ex6/images/6.2.8-german_landkreis_liste.png)
+
+
+Text
+````SQL
+/*** SQL **************************************************************************************/
+/* Calculate single Highway-Multilinestring from Highway network into temporary table #HWL */
+CREATE LOCAL TEMPORARY COLUMN TABLE #HWL ( HIGHWAY NVARCHAR(24), HIGHWAY_LINE ST_GEOMETRY(4326));
+--#ALTER TABLE HWAY ALTER (HIGHWAY_LINE ST_GEOMETRY(4326));
+INSERT INTO #HWL
+	SELECT "highway",  NEW ST_MultiLineString('MultiLineString (' || substring(LSTRING,3) || ')', 4326) AS HIGHWAY_LINE
+				FROM (
+						SELECT "highway", replace(agg , 'SRID=4326;LINESTRING ', ', ') AS LSTRING
+						FROM (
+								SELECT "highway",  STRING_AGG("geometry_GEO") AS agg 
+								FROM RAW_DATA.GEO_GERMANY_HIGHWAYS 
+								WHERE substr("ref",1,1)='A' AND "highway"='motorway'
+								GROUP BY "highway"
+							)
+					);
+        
+/* Select stations for each (all, batches or single) krs_name, and calculate distance to German Highway-Multilinestring */
+CREATE COLUMN TABLE STATION_HWAYDIST ("uuid" NVARCHAR(5000), HIGHWAY_DISTANCE DOUBLE);
+INSERT INTO STATION_HWAYDIST 
+SELECT "uuid", "STATION_P".ST_SRID(1000004326).ST_DISTANCE(HIGHWAY_LINE.ST_SRID(1000004326), 'meter') AS HIGHWAY_DISTANCE
+from
+	(SELECT "uuid", "longitude_latitude_GEO".ST_SRID(4326) AS "STATION_P" 
+   		FROM 	(SELECT S."uuid", "longitude_latitude_GEO"
+         		from TECHED_USER_999.STATION_PRICECLASSIFICATION S, TECHED_USER_999.GAS_STATIONS G
+         		WHERE S."krs_name" in (
+ 'Kreis Borken', 'Kreis Coesfeld', 'Kreis Dithmarschen', 'Kreis Düren', 'Kreis Ennepe-Ruhr-Kreis', 'Kreis Euskirchen', 
+ 'Kreis Gütersloh', 'Kreis Heinsberg', 'Kreis Herford', 'Kreis Herzogtum Lauenburg', 'Kreis Hochsauerlandkreis', 
+  ...
+  'Landkreis Würzburg', 'Landkreis Zollernalbkreis', 'Landkreis Zwickau', 'Stadtkreis Baden-Baden', 
+  'Stadtkreis Freiburg im Breisgau', 'Stadtkreis Heidelberg', 'Stadtkreis Heilbronn', 'Stadtkreis Karlsruhe', 
+  'Stadtkreis Mannheim', 'Stadtkreis Pforzheim', 'Stadtkreis Stuttgart', 'Stadtkreis Ulm'
+         		) AND
+         		       S."uuid"=G."uuid"
+         		) AS P
+     ),
+     #HWL;
+````
+
+Text
+````Python
+stations_hwaydist=conn.table("STATION_HWAYDIST")
+display(stations_hwaydist.head(5).collect())
+#6.2.9-german_highwaydist.png
+
+````
+<br>![](/exercises/ex6/images/6.2.9-german_highwaydist.png)
+
+
+Text
+
+
+
+
 
 ## Summary
 
 You've now concluded the last exercise, congratulations! 
 
-````SQL
-SELECT * FROM "AIS_DEMO"."GDELT_GEG" WHERE "lang" = 'en';
-````
