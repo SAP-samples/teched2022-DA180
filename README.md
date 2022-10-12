@@ -14,8 +14,6 @@ Most of the spatial and graph related exercises can be run on an SAP HANA Cloud 
 
 ## Exercises
 
-Provide the exercise content here directly in README.md using [markdown](https://guides.github.com/features/mastering-markdown/) and linking to the specific exercise pages, below is an example.
-
 - [Getting Started](exercises/ex0/)
     - [Base Data & Demo Scenario](exercises/ex0#subex1)
     - [SAP HANA Cloud setup](exercises/ex0#subex2)
