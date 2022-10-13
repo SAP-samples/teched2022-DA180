@@ -1,31 +1,34 @@
-# DA180 - Getting Started with Multimodel Capabilities in SAP HANA Cloud
+# DA180 - Getting Started with Multi-Model Capabilities in SAP HANA Cloud
 
 ## Description
 
-This repository contains the material for the SAP TechEd 2022 session called Session ID - Session Title.  
+This repository contains the material for the SAP TechEd 2022 session called DA180 - Getting Started with Multi-Model Capabilities in SAP HANA Cloud.  
 
 ## Overview
 
-This session introduces attendees to...
+This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. In the first part we will mainly work with General Transit Feed Specification ([GTFS](https://gtfs.org/)) data, which describes the **public transportation** of Adelaide, Australia. We 'll show how to do routing in a temporal graph, solving problems like "which bus takes me to the nearest pub?". Next, we'll show some tricks for importing/exporting spatial and graph data. In the second half of this workshop, we will analyze **gas price** data from [Tankerkoenig](https://tankerkoenig.de/), doing forecasts and classification.</br>
 
 ## Requirements
 
-The requirements to follow the exercises in this repository are...
+Most of the spatial and graph related exercises can be run on an SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system. Since there is some focus on 3rd party integration when it comes to data import/export, you'd need to install these tools to run the exercises on your own: QGIS, GDAL, DBeaver, Cytoscape.
 
 ## Exercises
 
-Provide the exercise content here directly in README.md using [markdown](https://guides.github.com/features/mastering-markdown/) and linking to the specific exercise pages, below is an example.
-
 - [Getting Started](exercises/ex0/)
-- [Exercise 1 - First Exercise Description](exercises/ex1/)
-    - [Exercise 1.1 - Exercise 1 Sub Exercise 1 Description](exercises/ex1/README.md#subex1)
-    - [Exercise 1.2 - Exercise 1 Sub Exercise 2 Description](exercises/ex1/README.md#subex2)
-- [Exercise 2 - Second Exercise Description](exercises/ex2/)
-    - [Exercise 2.1 - Exercise 2 Sub Exercise 1 Description](exercises/ex2/README.md#subex1)
-    - [Exercise 2.2 - Exercise 2 Sub Exercise 2 Description](exercises/ex2/README.md#subex2)
-- [Exercise 3 - Third Exercise Description](exercises/ex3/)
-    - [Exercise 3.1 - Exercise 3 Sub Exercise 1 Description](exercises/ex3/README.md#subex1)
-    - [Exercise 3.2 - Exercise 3 Sub Exercise 2 Description](exercises/ex3/README.md#subex2)
+    - [Base Data & Demo Scenario](exercises/ex0#subex1)
+    - [SAP HANA Cloud setup](exercises/ex0#subex2)
+    - [DBeaver, QGIS/GDAL, hana-ml, and Cytoscape](exercises/ex0#subex3)
+    - [Background Material](exercises/ex0#subex4)
+- [Exercise 1 - Routing on a spatio-temporal Graph](exercises/ex1/)
+    - [Exercise 1.1 - Import Points of Interest from OpenStreetMaps and General Transit Feed Specification data](exercises/ex1/README.md#subex1)
+    - [Exercise 1.2 - Understand the GTFS datamodel](exercises/ex1/README.md#subex2)
+    - [Exercise 1.3 - Shortest paths, isochrones, and top k nearest neighbors](exercises/ex1/README.md#subex3)
+    - [Exercise 1.4 - Get real-time vehicle positions](exercises/ex1/README.md#subex4)
+- [Exercise 2 - Import and export spatial data](exercises/ex2/)
+    - [Exercise 2.1 - Import common spatial file formats](exercises/ex2/README.md#subex1)
+    - [Exercise 2.2 - Vectorize raster data and loading into SAP HANA](exercises/ex2/README.md#subex2)
+    - [Exercise 2.3 - Spatial clustering in SAP HANA](exercises/ex2/README.md#subex3)
+- [Exercise 3 - Import and export graphs](exercises/ex3/)
 - [Exercise 4 - Forth Exercise Description](exercises/ex4/)
     - [Exercise 4.1 - Exercise 4 Sub Exercise 1 Description](exercises/ex4/README.md#subex1)
     - [Exercise 4.2 - Exercise 4 Sub Exercise 2 Description](exercises/ex4/README.md#subex2)
@@ -40,14 +43,7 @@ Provide the exercise content here directly in README.md using [markdown](https:/
 - [Appendix - Reference section](exercises/ex9_appendix/)
     - [Appendix A - Rereference Info 1](exercises/ex9_appendix/README.md#appA-sub1)
     - [Appendix A - Rereference Info 2](exercises/ex9_appendix/README.md#appA-sub2)
-    
-**OR** Link to the Tutorial Navigator for example...
 
-Start the exercises [here](https://developers.sap.com/tutorials/abap-environment-trial-onboarding.html).
-
-**IMPORTANT**
-
-Your repo must contain the .reuse and LICENSES folder and the License section below. DO NOT REMOVE the section or folders/files. Also, remove all unused template assets(images, folders, etc) from the exercises folder. 
 
 ## How to obtain support
 
