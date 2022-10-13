@@ -8,4 +8,4 @@ pydotplus==2.0.2
 numpy==1.19.5
 graphviz==0.16
 geopandas==0.10.2
-hana-ml==2.14.22091801
+hana-ml==2.14.22101400
