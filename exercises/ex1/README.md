@@ -66,7 +66,7 @@ The HANA table contains the flattened subset of the POIs.
 
 ![](images/TAB.png)
 
-Next we will load the GTFS data. There is a nice [list of available GTFS datasets on Github](https://github.com/MobilityData/mobility-database-catalogs#browsing-and-consuming-the-spreadsheet). You can download the [Adelaide data](https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip) as zip. This repo also contains a [copy][../../data/gtfs/adelaide/].
+Next we will load the GTFS data. There is a nice [list of available GTFS datasets on Github](https://github.com/MobilityData/mobility-database-catalogs#browsing-and-consuming-the-spreadsheet). You can download the [Adelaide data](https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip) as zip. This repo also contains a [copy](../../data/gtfs/adelaide).
 Like above, we are using pandas and hana-ml to bring in the data to HANA.
 ````python
 from hana_ml.dataframe import create_dataframe_from_pandas
