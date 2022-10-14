@@ -235,4 +235,4 @@ The vehicle in line 33 is perfectly on track.
 
 You've now ...
 
-Continue to - [Exercise 2 - Exercise 2 Description](../ex2/README.md)
+Continue to - [Exercise 2 - Routing on a Spatio-Temporal Graph](../ex2/README.md)

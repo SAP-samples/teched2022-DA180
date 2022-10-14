@@ -59,6 +59,7 @@ The VERTCIES data looks like this. We got "poi" and "stop" type of vertices, a "
 ![](images/vertices1.png)
 
 Looking at the "POI_TYPE" we see the following distribution in the VERTICES table.
+
 ![](images/vertices2.png)
 
 Last task is to create a GRAPH WORKSPACE to expose the network to the graph engine.
