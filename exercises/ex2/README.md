@@ -201,4 +201,4 @@ Interestingly, the top 5 clinics are much faster to reach.
 
 You've now ...
 
-Continue to - [Exercise 3 - Exercise 3 Description](../ex3/README.md)
+Continue to - [Exercise 3 - Import and export spatial vector and raster data, spatial clustering](../ex3/README.md)

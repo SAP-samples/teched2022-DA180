@@ -43,4 +43,4 @@ The SAP HANA Database Explorer provides an SQL editor, table viewer and data ana
 
 You are all set...
 
-Continue to - [Exercise 1 - Routing on a spatio-temporal Graph](../ex1/README.md)
+Continue to - [Exercise 1 - Loading and visualizing a public transportation network](../ex1/README.md)
