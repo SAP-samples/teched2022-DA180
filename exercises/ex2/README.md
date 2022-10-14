@@ -1,5 +1,8 @@
 # Exercise 2 - Routing on a Spatio-Temporal Graph
 
+**This page outline the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
+- The [SQL file](code/2022_Q3_DA180_Ex_2_Routing_pub.sql) contains all the statements for this exercise
+
 In this exercise, we will look at the public transportation network of Adelaide, Australia, and learn how to run routing/pathfinding queries on this spatio-temporal network. For that, we create the networks edges and vertices from the GTFS data. Then we create a Graph Workspace in SAP HANA and run some "GraphScript" functions, which will answer "shortest path one-to-on" and "top k nearest neighbors" queries.
 
 ## Exercise 2.1 - Transform GTFS data and create a Graph Workspace<a name="subex1"></a>
@@ -59,6 +62,7 @@ The VERTCIES data looks like this. We got "poi" and "stop" type of vertices, a "
 ![](images/vertices1.png)
 
 Looking at the "POI_TYPE" we see the following distribution in the VERTICES table.
+
 ![](images/vertices2.png)
 
 Last task is to create a GRAPH WORKSPACE to expose the network to the graph engine.
@@ -200,4 +204,4 @@ Interestingly, the top 5 clinics are much faster to reach.
 
 You've now ...
 
-Continue to - [Exercise 3 - Exercise 3 Description](../ex3/README.md)
+Continue to - [Exercise 3 - Import and export spatial vector and raster data, spatial clustering](../ex3/README.md)
