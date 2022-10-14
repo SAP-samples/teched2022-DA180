@@ -129,7 +129,7 @@ There are a lot of benches in the CENTRAL WARD.
 
 ![](images/clus2.png)
 
-Instead of grouping the points by fixed location (wards), you can also let HANA generate a regular hexagon grid that covers the POIs. There is built-in SQL syntax for this: GROUP CLUSETR BY.
+Instead of grouping the points by fixed location (wards), you can also let HANA generate a regular hexagon grid that covers the POIs. There is built-in SQL syntax for this: GROUP CLUSTER BY.
 
 ````SQL
 SELECT ST_ClusterID() AS "LOCATION_ID", ST_ClusterCell() AS "CCELL", COUNT(*) AS "NUM_POIS"
