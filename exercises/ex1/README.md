@@ -11,7 +11,7 @@ First, we will load two sets of data. One is a list of Points of Interest (POIs)
 
 After completing these steps you will know how you can call the OSM overpass API and load geolocation data using "SAP HANA Python Client API for machine learning algorithms" (hana-ml).
 
-We will run the [python code](code/2022_Q3_1_1_POI_and_GTFS_pub.ipynb) in a Jupyter Notebook, and the [SQL statements](code/2022_Q3_DA180_1_POI_and_GTFS) from a SQL console (SAP HANA Database Explorer or DBeaver). Below is the description of the important steps.
+We will run the [python code](code) in a Jupyter Notebook, and the [SQL statements](code/2022_Q3_DA180_Ex_1_POI_and_GTFS_pub.sql) from a SQL console (SAP HANA Database Explorer or DBeaver). Below is the description of the important steps.
 
 This is how we create a query for cafe/restaurant/bar type of amenities within 500m of Adelaide city center.
 ```` Python
@@ -66,7 +66,7 @@ The HANA table contains the flattened subset of the POIs.
 
 ![](images/TAB.png)
 
-Next we will load the GTFS data. There is a nice [list of available GTFS datasets on Github](https://github.com/MobilityData/mobility-database-catalogs#browsing-and-consuming-the-spreadsheet). You can download the [Adelaide data](https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip) as zip. This repo also contains a [copy][data/gtfs].
+Next we will load the GTFS data. There is a nice [list of available GTFS datasets on Github](https://github.com/MobilityData/mobility-database-catalogs#browsing-and-consuming-the-spreadsheet). You can download the [Adelaide data](https://gtfs.adelaidemetro.com.au/v1/static/latest/google_transit.zip) as zip. This repo also contains a [copy][../../data/gtfs/adelaide/].
 Like above, we are using pandas and hana-ml to bring in the data to HANA.
 ````python
 from hana_ml.dataframe import create_dataframe_from_pandas
