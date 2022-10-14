@@ -3,7 +3,7 @@
 In this exercise, we will look at the public transportation network of Adelaide, Australia.
 First, we will load two sets of data. One is a list of Points of Interest (POIs) which we pull from OpenStreetMap (OSM). The other one is a GTFS (General Transportation Feed Specification) set of files. The GTFS files describe public transport schedules, so basically when busses/metros depart from stations. We will take a look at the GTFS datamodel and plot it on a map. In the last step, we will poll a GTFS API for real-time vehicle positions.
 
-## Exercise 1.1 Importing Points of Interest from OpenStreetMaps and General Transit Feed Specification data<a name="subex1"></a>
+## Exercise 1.1 - Importing Points of Interest from OpenStreetMaps and General Transit Feed Specification data<a name="subex1"></a>
 
 After completing these steps you will know how you can call the OSM overpass API and load geolocation data using "SAP HANA Python Client API for machine learning algorithms" (hana-ml).
 
@@ -83,7 +83,7 @@ hdf_stops = create_dataframe_from_pandas(
     )
     ...
 ````
-## Exercise 1.2 Understanding the GTFS datamodel<a name="subex2"></a>
+## Exercise 1.2 - Understanding the GTFS datamodel<a name="subex2"></a>
 
 Now we have created 5 tables in HANA: ROUTE, STOPS, TRIPS, SHAPES, and STOPTIMES. The [GTFS specification](https://gtfs.org/) comprises some more, but we'll focus on these 5.
 ROUTES contains some masterdata about routes.
@@ -163,7 +163,7 @@ SELECT "route_id", "SHAPE_28354" FROM (
 There are more than 500 ROUTES, here are some of them... colorcoded in QGIS.
 ![](images/routelines.png)
 
-## Exercise 1.3 Polling for real-time vehicle positions<a name="subex2"></a>
+## Exercise 1.3 - Polling for real-time vehicle positions<a name="subex3"></a>
 Some cities/public transport agencies not only provide static GTFS data, but also offer real-time APIs to poll for vehicle positions, trip updates, or service alerts. Most of these API use protobuffer as response format. Again, we use python/hana-ml to get vehicle positions and store them in a HANA table.
 
 First, we define a function that gets the data and puts it in a pandas dataframe.
