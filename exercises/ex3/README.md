@@ -47,7 +47,7 @@ Exporting HANA data into a file is also easy. Below you see how to export the is
 
 ## Exercise 3.2 - Convert raster data using GDAL<a name="subex2"></a>
 
-It was already mentioned that some georeferenced data comes in form of raster files, i.e. images. For example, Esri provide worldwide population density data in its ["Living Atlas"](https://www.arcgis.com/home/item.html?id=c90197b8948948d7b2194e1b03b11d1e). You'll find a .tif file in the data folder that contains population density for the Adelaide region. We can simply drag&drop the file into QGIS.
+It was already mentioned that some georeferenced data comes in form of raster files, i.e. images. For example, Esri provide worldwide population density data in its ["Living Atlas"](https://www.arcgis.com/home/item.html?id=c90197b8948948d7b2194e1b03b11d1e). You'll find a .tif file in the [data folder of this repo](../../data/raster) that contains population density for the Adelaide region. We can simply drag&drop the file into QGIS.
 
 ![](images/popdens1.png)
 
