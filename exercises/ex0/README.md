@@ -4,13 +4,13 @@ This section should give you an understanding of the base scenario and data. Add
 
 ## Base Data & Demo Scenario<a name="subex1"></a>
 
-Graphs describe networks as a set of vertices and edges. The public GTFS data we use in the first exercise describes the public transportation network of Adelaide, Australia. Vehicles are scheduled to go from one stop (a geolocation) to another, departing and arriving at a certain time. Hence, the transportation graph is spatio-temporal. We'll demonstrate some of SAP HANA's Graph engine features to solve routing problems on this graph. Many use cases of otehr industries are quite similar. Think about production, logistics, utilities, supply chains etc.
+Graphs describe networks as a set of vertices and edges. The public GTFS data we use in the first exercise describes the public transportation network of Adelaide, Australia. Vehicles are scheduled to go from one stop (a geolocation) to another, departing and arriving at a certain time. Hence, the transportation graph is spatio-temporal. We'll demonstrate some of SAP HANA's Graph engine features to solve routing problems on this graph. Many use cases of other industries are quite similar. Think about production, logistics, utilities, supply chains etc.
 
 Christoph, describe your gas stuff
 
 ## SAP HANA Cloud setup<a name="subex2"></a>
 
-Most of the exercises and processing patterns can be run on a free SAP HANA Cloud trial system. To get one, visit [SAP HANA Cloud Trial home](https://www.sap.com/cmp/td/sap-hana-cloud-trial.html). To run timeseries forecasting using a PAL algorithm and to work with JSON data using the Document Store, you will need a full SAP HANA Cloud. Make sure to enable the **Script Server** and **Document Store**. Refer to [SAP HANA Cloud Administration with SAP HANA Cloud Central](https://help.sap.com/viewer/9ae9104a46f74a6583ce5182e7fb20cb/hanacloud/en-US/e379ccd3475643e4895b526296235241.html) for details.
+Some of the exercises and processing patterns can be run on a free SAP HANA Cloud trial system. To get one, visit [SAP HANA Cloud Trial home](https://www.sap.com/cmp/td/sap-hana-cloud-trial.html). To run the machine learning exercises (5 and 6) and to work with JSON data using the Document Store (ex 1), you will need a full SAP HANA Cloud. Make sure to enable the **Script Server** and **Document Store**. Refer to [SAP HANA Cloud Administration with SAP HANA Cloud Central](https://help.sap.com/viewer/9ae9104a46f74a6583ce5182e7fb20cb/hanacloud/en-US/e379ccd3475643e4895b526296235241.html) for details.
 
 The HANA database user you work with requires some roles and privileges
 * Roles `AFL__SYS_AFL_AFLPAL_EXECUTE` and `AFL__SYS_AFL_AFLPAL_EXECUTE_WITH_GRANT_OPTION` to execute PAL algorithms
@@ -30,8 +30,6 @@ The SAP HANA Database Explorer provides an SQL editor, table viewer and data ana
 
 **Cytoscape**<br>for advanced graph visualization you can pull data from a Graph Workspace into Cytoscape using an unsupported preview version of the [Cytoscape HANA plug-in](https://blogs.sap.com/2021/09/22/explore-networks-using-sap-hana-and-cytoscape/).
 
-
-![](images/clients_apps.png)
 
 ##  Background Material<a name="subex4"></a>
 
