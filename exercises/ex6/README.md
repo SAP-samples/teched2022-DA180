@@ -375,19 +375,6 @@ display(scoremetrics.collect())
 <br>![](/exercises/ex6/images/6.3.6-score_cm_cummetrics.png)
 
 
-The Shapley explainer plot, shows the distribution each feature has on the model predictions, comparing predicted values, original values and feature attribute values
-````Python
-#  Show the distribution of the impacts each feature has on the model output using Shapley ML explainability values 
-import pydotplus
-import graphviz
-from hana_ml.visualizers.model_debriefing import TreeModelDebriefing
-
-shapley_explainer = TreeModelDebriefing.shapley_explainer(pred_res, df_test, key='uuid', label='STATION_CLASS')
-shapley_explainer.summary_plot() 
-
-````
-<br>![](/exercises/ex6/images/6.3.8-shapley_global.png)
-
 
 
 
@@ -473,22 +460,24 @@ cf = '["highway"~"motorway"]'
 
 Use OSMNX to download only the highway network for a single region.
 ````Python
-%%time
-import osmnx as ox
+# Collect the SHAPE of the region into geopandas dataframe
 hdf_RNK_SHAPE = stations_spatial.filter("\"krs_name\"='Landkreis Rhein-Neckar-Kreis'" ).select('uuid','krs_name', 'SHAPE').head(1)
 display(hdf_RNK_SHAPE.drop('SHAPE').collect())
 
-# Create Geopandas Dataframe from the HANA dataframe
 gdf_RNK_SHAPE = gpd.GeoDataFrame(hdf_RNK_SHAPE.select('uuid', 'SHAPE').collect(), geometry='SHAPE')
 gdf_RNK_SHAPE=gdf_RNK_SHAPE.rename_geometry('geometry')
 display(gdf_RNK_SHAPE.head(10))
+````
 
+````Python
 # Use OSMNX-method to download network graph from polygon
+import osmnx as ox
 ox.config(use_cache=True, log_console=True)
+
 cf = '["highway"~"motorway"]'
 g = ox.graph_from_polygon(polygon = gdf_RNK_SHAPE['geometry'][0], network_type = 'drive',custom_filter=cf)
-#fig, ax = ox.plot_graph(g, fig_height=5) 
 ````
+
 Check if the network graph object has been successfully downloaded and stored as dataframe "g" 
 ````Python
 # Check successful object download
