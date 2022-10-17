@@ -2,16 +2,16 @@
 
 In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located fuel station data of Germany, and apply segmented forecasting techniques using the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to build and apply forecast models for each station's "e5" car fuel price.
 
-The exercise is composed from the perspective of a Data Scientist working in a Python (Juypter Notebook) environment, leveraging the [Python Machine Learning client for SAP HANA](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/index.html). For reference information regarding the setup and configuration of your Python environment see [Appendix].
+The exercise is composed from the perspective of a Data Scientist working in a Python (Juypter Notebook) environment, leveraging the [Python Machine Learning client for SAP HANA](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/index.html). For reference information regarding the setup and configuration of your Python environment see [Python environment preparation](/exercises/ex9_appendix/README.md).
 
 The objective and goal for this exercise is
 - in ex 5.1 to download the stations and regions geo-data, save them in SAP HANA CLoud, apply HANA-spatial filtering of the data and visualize it
 - in ex 5.2 to download the fuel price data, save it to SAP HANA Cloud and explore (visually) the time series data
 - in ex 5.3 to build forecast models on the spatially filtered stations, apply and visualize the predicted fuel price data.
 
-As an extra and optional exercise, the [add-on section]() describes how to evaluate the forecast model accuracy for all stations forecast models.
+As an extra and optional exercise, the [add-on section](/exercises/ex5/README.md#subexADDON) describes how to evaluate the forecast model accuracy for all stations forecast models.
 
-You can approach the exercises by  copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](https://github.com/SAP-samples/teched2022-DA180/blob/main/exercises/ex5/DA180-Exercise5-Apply%20Forecasting%20to%20multi-model%20data-Student.ipynb).
+You can approach the exercises by  copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](/exercises/ex5/DA180-Exercise5-Apply%20Forecasting%20to%20multi-model%20data-Student.ipynb).
 
 ## Preparation steps in your Python Jupyter Notebook
 Import the required python packages
@@ -51,7 +51,7 @@ conn= dataframe.ConnectionContext(address=host, port=port, user=user, password=p
 
 
 __Preparation Step - file downloads__  
-Note, the data used along with the exercises is thereas used only for the purpose of your personal education, for details about the use case data sources and licenses see the [reference section]()  
+Note, the data used along with the exercises is thereas used only for the purpose of your personal education, for details about the use case data sources and licenses see the [data reference section](/exercises/ex5/README.md#subexDATAREF)  
 
 Download the following files to your project directory ./teched2022-DA180/data/fuelprice
 - Germany Landkreise regions shapefile from [here](https://data.opendatasoft.com/explore/dataset/georef-germany-kreis@public/download/?format=shp&timezone=Europe/Berlin&lang=en) and save it to ./data/fuelprice/
@@ -529,7 +529,7 @@ You've now concluded Exercise 5 and successfully station- and region-geo data, u
 
 Continue now with [Exercise 6](../ex6/README.md) or you may extend with evaluating the forecast accurary in the following section first.
 
-## Add-on section (optional) - Evaluate Forecast Accuracy
+## Add-on section (optional) - Evaluate Forecast Accuracy<a name="subexADDON"></a>
 
 In order to evaluate the forecast accuracy for each stations's model, we need to comparing predicted forecast values (from the predict-results) with the actual ground-truth e5-values of the test data time period.
 ````Python
@@ -585,7 +585,7 @@ fc_acc.collect()
 ````
 ![](/exercises/ex5/images/5.3.12-fc_acc_results.png)
 
-## Reference
+## Reference<a name="subexDATAREF"></a>
 
 The __gas station and fuel price data__ is published on the public website [Tankerkönig](http://www.tankerkoenig.de/). This dataset contains the gas prices of all gas stations in Germany from 2014 until today as csv files. A record contains the station id, the datetime, prices for diesel, e5 and e10 and a change indicator. In a separate csv the data of the service stations including its geolocation is provided.
 
