@@ -8,7 +8,8 @@ fiona
 pandas==1.1.2
 numpy==1.19.5
 matplotlib==3.5.3
-graphviz==0.1
+rtree==1.0.1
+pygeos==0.13
 pydotplus==2.0.2
 geopandas==0.10.2
 osmnx==0.16.0

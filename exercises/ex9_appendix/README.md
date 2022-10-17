@@ -14,10 +14,11 @@ shapely
 pipwin  
 gdal  
 fiona  
+rtree==1.0.1
+pygeos==0.13
 pandas==1.1.2  
 numpy==1.19.5  
 matplotlib==3.5.3  
-graphviz==0.1  
 pydotplus==2.0.2  
 geopandas==0.10.2  
 osmnx==0.16.0  
@@ -40,12 +41,13 @@ If you experience challenges with installing the required packages, it is recomm
 !pip install pandas==1.1.2
 !pip install numpy==1.19.5
 !pip install matplotlib==3.5.3
-!pip install graphviz==0.1
 !pip install pydotplus==2.0.2
 !pip install shapely  
 !pip install pipwin  
 !pipwin install gdal  
 !pipwin install fiona  
+!pip install rtree==1.0.1
+!pip install pygeos==0.13
 !pip install geopandas==0.10.2
 !pip install osmnx==0.16.0
 !pip install hdbcli==2.14.18
