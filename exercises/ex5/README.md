@@ -72,7 +72,7 @@ Your project data directory would look like
 __Step 1 - Import the fuel stations data__  
 Execute the following Python code to import the stations.csv-file into your HANA system.  
 
-Note, any __uploaded data will be uploaded to the schema of your SAP HANA Cloud connection database userid__. Thus here in this workshop, it would for example be a user like __TECHED_USER_###__ (where ### would need to be replaced with the 3-digits of your specific / assinged HANA system userid or schema).
+Note, any __uploaded data will be uploaded to the schema of your SAP HANA Cloud connection database userid__. Thus here in this workshop, it would for example be a user like __'TECHED_USER\_###'__ (where ### would need to be replaced with the 3-digits of your specific / assinged HANA system userid or schema).
 - During data upload and dataframe creation using the __create_dataframe_from_pandas__-method, you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
 ````Python
 # load gas station data from csv

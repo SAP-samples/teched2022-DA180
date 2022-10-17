@@ -536,11 +536,10 @@ hdf = create_dataframe_from_pandas(
     pandas_df=pd_edges,
     geo_cols=["geometry"],
     srid=4326,
-    schema='TECHED_USER_999',
     table_name="GEO_GERMANY_HIGHWAYS", primary_key='ID'
     , drop_exist_tab=True, force=True)
 
-german_highways = conn.sql('select * from "TECHED_USER_999"."GEO_GERMANY_HIGHWAYS"')
+german_highways = conn.sql('select * from "GEO_GERMANY_HIGHWAYS"')
 german_highways.head(3).collect()
 ````
 ![](/exercises/ex6/images/6.2.7-german_highway_edges_hdf.png)  
