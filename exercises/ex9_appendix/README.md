@@ -9,7 +9,11 @@ The following __python packages and versions__ are required to work through the 
 protobuf==3.20.1  
 gtfs-realtime-bindings==0.0.7  
 requests
-protobuf3_to_dict
+protobuf3_to_dict  
+shapely  
+pipwin
+gdal
+fiona
 pandas==1.1.2  
 numpy==1.19.5  
 matplotlib==3.5.3  
@@ -26,4 +30,12 @@ pip install -r requirements.txt
 import hana_ml
 
 ````
+If you experience challenges with installing the required packages, it is recommended to the following packages from the Python Notebook before you start using the following command 
+````Python
+!pip install shapely  
+!pip install pipwin  
+!pipwin install gdal  
+!pipwin install fiona  
+!pip install geopandas
 
+````
