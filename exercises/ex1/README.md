@@ -62,6 +62,7 @@ hdf_pois_small = create_dataframe_from_pandas(
 Let's see the data in HANA. The collection stores the data in JSON format.
 
 ![](images/JSON.png)
+
 The HANA table contains the flattened subset of the POIs.
 
 ![](images/TAB.png)
@@ -89,24 +90,29 @@ hdf_stops = create_dataframe_from_pandas(
 ````
 ## Exercise 1.2 - Understanding the GTFS datamodel<a name="subex2"></a>
 
-Now we have created 5 tables in HANA: ROUTE, STOPS, TRIPS, SHAPES, and STOPTIMES. The [GTFS specification](https://gtfs.org/) comprises some more, but we'll focus on these 5.
-ROUTES contains some masterdata about routes.
+Now we have created 5 tables in HANA: `GTFS_ROUTES`, `GTFS_STOPS`, `GTFS_TRIPS`, `GTFS_SHAPES`, and `GTFS_STOPTIMES`. The [GTFS specification](https://gtfs.org/) comprises some more, but we'll focus on these 5.
+
+`ROUTES` contains some masterdata about routes.
 
 ![](images/routes.png)
 
-The STOPS have a geolocation.
+The `STOPS` have a geolocation.
+
 ![](images/stops.png)
 
-The TRIPS run on a ROUTE and are related to SHAPES.
+The `TRIPS` relate to `ROUTES` via `route_id` and to `SHAPES` via `shape_id`.
+
 ![](images/trips.png)
 
-The SHAPES are an ordered set of points which make up a TRIP.
+The `SHAPES` are an ordered set of points which make up a `TRIP`.
+
 ![](images/shapes.png)
 
-And finally, the STOPTIMES indicate when a TRIP's vehicle arrive and departs at a STOP.
+And finally, the `STOPTIMES` indicate when a `TRIP`'s vehicle arrive and departs at a `STOP`.
+
 ![](images/stoptimes.png)
 
-We can run a query to get all STOP locations of a TRIP. A TRIP relates to its STOPTIMES, which relates to STOPS, which have a geolocation.
+We can run a query to get all `STOP` locations of a `TRIP`. A `TRIP` relates to its `STOPTIMES`, which relate to `STOPS`, which have a geolocation.
 ````SQL
 SELECT TRI."trip_id", ST_UNIONAGGR(STO."SHAPE_28354") AS LINE_OF_STOPS
 	FROM "TECHED_USER_000"."GTFS_TRIPS" AS TRI,
@@ -118,7 +124,7 @@ SELECT TRI."trip_id", ST_UNIONAGGR(STO."SHAPE_28354") AS LINE_OF_STOPS
 ````
 ![](images/tripstops.png)
 
-If we query the SHAPES of a TRIP we find the set of waypoints which describe the vehicle's path in detail.
+If we query the `SHAPES` of a `TRIP` we find the set of waypoints which describe the vehicle's path in detail.
 ````SQL
 SELECT TRI."trip_id", ST_UNIONAGGR(SHA."SHAPE_28354") AS LINE_OF_SHAPES
 	FROM "TECHED_USER_000"."GTFS_TRIPS" AS TRI,
@@ -129,7 +135,7 @@ SELECT TRI."trip_id", ST_UNIONAGGR(SHA."SHAPE_28354") AS LINE_OF_SHAPES
 ````
 ![](images/tripshapes.png)
 
-We want to visualize a TRIP's pathway as a linestring (not just an ordered set of point), so we concatenate the individual points and store the results in a table. This is how you could do it today in HANA (better functionality coming up ;-)).
+We want to visualize a `TRIP`'s pathway as a linestring (not just an ordered set of point), so we concatenate the individual points and store the results in a table. This is how you could do it today in HANA (better functionality coming up ;-)).
 ````SQL
 CREATE COLUMN TABLE "TECHED_USER_000"."GTFS_SHAPE_LINES"(
 	"shape_id" NVARCHAR(5000) PRIMARY KEY,
@@ -141,11 +147,11 @@ INSERT INTO "TECHED_USER_000"."GTFS_SHAPE_LINES"("shape_id", "SHAPE_28354")
 		(SELECT "shape_id", "shape_pt_sequence" , ("shape_pt_lon" ||' '|| "shape_pt_lat") AS PAIRS FROM "TECHED_USER_000"."GTFS_SHAPES")
 	GROUP BY "shape_id";
 ````
-A TRIP's path looks like this.
+A `TRIP`'s path looks like this.
 
 ![](images/tripline.png)
 
-There are multiple TRIPs running on a ROUTE. ROUTE "BTANIC" is served more than 500 times a day.
+There are multiple `TRIP`s running on a `ROUTE`. `ROUTE` "BTANIC" is served more than 500 times a day.
 ````SQL
 SELECT ROU."route_id", COUNT(*) AS "#TRIPS"
 	FROM "TECHED_USER_000"."GTFS_ROUTES" AS ROU
@@ -155,7 +161,7 @@ SELECT ROU."route_id", COUNT(*) AS "#TRIPS"
 ````
 ![](images/btanic.png)
 
-Not all TRIPs on a ROUTE are identical. Late at night, some ROUTES are not served at full length. So to get a ROUTES linestring for visualization, we will identify the longest of the ROUTE's TRIP. This time we'll just create a view.
+Not all `TRIP`s on a `ROUTE` are identical. Late at night, some `ROUTES` are not served at full length. So to get a `ROUTE`s linestring for visualization, we will identify the longest of the `ROUTE`'s `TRIP`. This time we'll just create a view.
 ````SQL
 CREATE OR REPLACE VIEW "TECHED_USER_000"."V_ROUTE_LINES" AS
 SELECT "route_id", "SHAPE_28354" FROM (
@@ -164,7 +170,8 @@ SELECT "route_id", "SHAPE_28354" FROM (
 	)
 	WHERE R = 1;
 ````
-There are more than 500 ROUTES, here are some of them... colorcoded in QGIS.
+There are more than 500 `ROUTES`, here are some of them... color-coded in QGIS.
+
 ![](images/routelines.png)
 
 ## Exercise 1.3 - Polling for real-time vehicle positions<a name="subex3"></a>
@@ -181,7 +188,7 @@ def get_locations_as_df() -> pd.DataFrame:
     df['vehicle.timestamp'] = pd.to_datetime(df['vehicle.timestamp'], unit='s')
     return df
 ````
-Then we define a function that uses ceate_dataframe_from_pands to store the data in a HANA table. We append the data to the "LOC_RT_HISTORY" so we get a history of vehicle positions. The data in "LOC_RT" is overwritten everytime we insert new data.
+Then we define a function that uses ceate_dataframe_from_pands to store the data in a HANA table. We append the data to the `LOC_RT_HISTORY` so we get a history of vehicle positions. The data in `LOC_RT` is overwritten everytime we insert new data.
 ````python
 def store_locations():
     df = get_locations_as_df()
@@ -212,12 +219,14 @@ while True:
 ````
 
 We can plot the vehicle positions on a map and use some advance QGIS symbology to visualize the direction of the vehicle.
+
 ![](images/rt1.png)
 
 Using the historic data we can even add a 10 min trace.
+
 ![](images/rt2.png)
 
-At last, we want to understand which of the vehicles are not where they are supposed to be. We check the distance between the current vehidle position and the TRIP's linestring.
+At last, we want to understand which of the vehicles are not where they are supposed to be. We check the distance between the current vehicle position and the `TRIP`'s linestring.
 ````SQL
 SELECT "id", "vehicle.trip.trip_id" AS "trip_id",
     "vehicle.trip.route_id" AS "route_id",
@@ -228,15 +237,17 @@ SELECT "id", "vehicle.trip.trip_id" AS "trip_id",
 	FROM TECHED_USER_000."LOC_RT" AS LOC
 	LEFT JOIN TECHED_USER_000."V_TRIP_LINES" AS TRI ON LOC."vehicle.trip.trip_id" = TRI."trip_id"
 ````
-The vehicle in line 6 is more than 1km away from its trip.
+The vehicle in line 6 is more than 1km away from its `TRIP`.
+
 ![](images/pos1.png)
 
 The vehicle in line 33 is perfectly on track.
+
 ![](images/pos2.png)
 
 
 ## Summary
 
-You've now ...
+You've now loaded POIs and GTFS data.
 
 Continue to - [Exercise 2 - Routing on a Spatio-Temporal Graph](../ex2/README.md)
