@@ -11,7 +11,7 @@ The objective and goal for this exercise is
 
 As an extra and optional exercise, the [add-on section](exercises/ex6/README.md#subexAddOn) describes how to evaluate, store and debrief the classifier model in more detail. Furthermore  an add-on exercise describes how to download German-highway network data and calculate the spatial distance between stations and the next highway.
 
-You can approach the exercises by copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](https://github.com/SAP-samples/teched2022-DA180/blob/main/exercises/ex6/DA180-Exercise6-Build%20a%20ML%20classification%20model%20on%20multi-model%20data-Student.ipynb).
+You can approach the exercises by copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](/exercises/ex6/DA180-Exercise6-Build%20a%20ML%20classification%20model%20on%20multi-model%20data-Student.ipynb).
 
 ## Exercise 6.1 Prepare and explore fuel station classification data<a name="subex1"></a>
 
