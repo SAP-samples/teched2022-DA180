@@ -1,15 +1,15 @@
 # Exercise 5 - Apply Forecasting to multi-model data
 
-In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located fuel station data of Germany, and apply segmented forecasting techniques using the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to build and apply forecast models for each station's "e5" car fuel price.
+In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located fuel station data of Germany. We then apply segmented forecasting techniques using the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to build and apply forecast models for each station's "e5" car fuel price.
 
 The exercise is composed from the perspective of a Data Scientist working in a Python (Juypter Notebook) environment, leveraging the [Python Machine Learning client for SAP HANA](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/index.html). For reference information regarding the setup and configuration of your Python environment see [Python environment preparation](/exercises/ex9_appendix/README.md).
 
-The objective and goal for this exercise is
-- in ex 5.1 to download the stations and regions geo-data, save them in SAP HANA CLoud, apply HANA-spatial filtering of the data and visualize it
-- in ex 5.2 to download the fuel price data, save it to SAP HANA Cloud and explore (visually) the time series data
-- in ex 5.3 to build forecast models on the spatially filtered stations, apply and visualize the predicted fuel price data.
+The __objective and goal__ for this exercise is
+- in ex 5.1 to download the stations and regions geo-data, save them in SAP HANA CLoud, apply HANA-spatial filtering to the data and visualize it
+- in ex 5.2 to download the fuel price data, save it to SAP HANA Cloud and explore the time series data visually
+- in ex 5.3 to build e5 price forecast models on the spatially filtered stations and visualize the predicted fuel price data.
 
-As an extra and optional exercise, the [add-on section](/exercises/ex5/README.md#subexADDON) describes how to evaluate the forecast model accuracy for all stations forecast models.
+As an extra and optional exercise, the [add-on section](/exercises/ex5/README.md#subexADDON) describes how to evaluate the forecast model accuracy for each stations forecast model.
 
 You can approach the exercises by  copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](/exercises/ex5/DA180-Exercise5-Apply%20Forecasting%20to%20multi-model%20data-Student.ipynb).
 
@@ -72,8 +72,8 @@ Your project data directory would look like
 __Step 1 - Import the fuel stations data__  
 Execute the following Python code to import the stations.csv-file into your HANA system.  
 
-Note, any __uploaded data will be uploaded to the schema of your SAP HANA Cloud connection database userid__. Thus here in this workshop it would for example be user __TECHED_USER_###__ (where ### would need to be replaced with the 3-digits of your specific / assinged HANA system userid or schema).
-- During data upload and dataframe creation using __create_dataframe_from_pandas__  you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
+Note, any __uploaded data will be uploaded to the schema of your SAP HANA Cloud connection database userid__. Thus here in this workshop, it would for example be a user like __TECHED_USER_###__ (where ### would need to be replaced with the 3-digits of your specific / assinged HANA system userid or schema).
+- During data upload and dataframe creation using the __create_dataframe_from_pandas__-method, you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
 ````Python
 # load gas station data from csv
 stations_pd = pd.read_csv('./data/fuelprice/stations.csv', sep=',', header=None, skiprows=1,
@@ -102,7 +102,7 @@ The following result will be presented
 <br>
 
 __Step 2 - Import the Germany "Landkreise"-regions shapefile__  
-Execute the following lines of python code to import the Germany "Landkreise" regional areas shapefile.  
+Execute the following lines of python code to import the Germany "Landkreise" regional areas-shapefile.  
 
 ````Python
 # create dataframe from shapefile for german regions "Landreise"
@@ -196,9 +196,10 @@ The following map will be shown
 
 ## Exercise 5.2 - Load, prepare and explore fuel price datasets<a name="subex2"></a>
 __Step 1 - Import fuel price csv-files__  
-With the following step, you can import all csv-files from a local folder into a single HANA table represented by a HANA dataframe using the __createcreate_dataframe_from_pandas__ method.   
-Here it is assumed that each months data is located in one folder.
-The demo screenshots show may be based on downloaded data for multiple months in 2022 and thus may differ if you only downloaded the September 2022 data.
+With the following step, you can import all csv-files from a local folder into a single HANA table represented by a HANA dataframe using the __createcreate_dataframe_from_pandas__-method.   
+Here it is assumed that each months data is located in one folder. 
+
+Note, the demo screenshots in exercise 5 and 6 may show results based on downloaded data for multiple months in 2022 and thus may differ, if you had only downloaded the September 2022 data.
 
 ````Python
 # Retrieve hana fuel price csv-file name into a Python list
@@ -287,12 +288,12 @@ ax, dist_data = eda.distribution_plot( data=fuelprice_all_hdf, column="e5", bins
                                       title="Distribution of E5 prices", debrief=False)
 plt.show()
 ````
-The distribution plot now shows are more focused plot of the price data.![](/exercises/ex5/images/5.2.6-price_dist_plot2.png)
+The distribution plot now shows a more focused plot of the price data.![](/exercises/ex5/images/5.2.6-price_dist_plot2.png)
 
 
 <br>
 
-Now, in order the visualize the original time series data itself and in order to not pull the millions of data points to python, we use the __m4_sampling__ method of hana_ml. M4 is a visualization-oriented time series data aggregation method. The M4 width parameter (here 200) is an indicator to how many pixels wide the visualization plot will be.
+Now, in order the visualize the original time series data itself and in order to not pull the millions of data points to python, we use the __m4_sampling__ method of hana_ml. M4 is a visualization-oriented time series data aggregation method. The M4 width parameter (here 200) is an indicator to how many pixels wide the visualization plot will be and thus the datapoints to be reduced respectively.
 ````Python
 # M4 sampling and time series plot
 from hana_ml.visualizers.m4_sampling import m4_sampling
@@ -322,10 +323,10 @@ timeseries_box_plot(data=fuelprice_sample, col="e5", key="date", cycle="MONTH")
 <br>
 
 ## Exercise 5.3 - Forecast the fuel prices per station <a name="subex3"></a>
-In this section we now want to model one fuel price forecast for each gas station in parallel, also known as segmented forecasting approach. As the fuel price time series is not a simple auto-regressive time series, but is dependent on external factors (e.g. holidays) and other (incl. irregular) changepoints we will apply the Additive-Model-Analysis (aka prophet) forecasting method from the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/7e78d06c0e504789bcc32256d3f7f871.html?locale=en-US). This forecast method can be applied in massive-mode, invoking the segmented execution approach (forecast by gas station in parallel).
+In this section we now want to model a specific fuel price forecast for each gas station in parallel, also known as __segmented forecasting__ approach. As the fuel price time series is not a simple auto-regressive time series, but is dependent on external factors (e.g. holidays) and other (incl. irregular) changepoints we will apply the Additive-Model-Analysis (aka prophet) forecasting method from the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/7e78d06c0e504789bcc32256d3f7f871.html?locale=en-US). This forecast method can be applied in massive-mode, invoking the segmented execution approach (build forecast models by gas station in parallel).
 
 __Step 1 - Select the price data for the local region and time range__  
-For a more focused analysis, we want to model forecast only for the 171 gas stations in the regional area around the SAP headquarters.
+For a more focused analysis, we want to model the forecasts only for the 171 gas stations in the regional area around the SAP headquarters.
 
 ````Python
 # Refelect number of service stations in local regrion close to SAP HQ
@@ -350,7 +351,7 @@ display(fuelprice_rnk_hdf.collect())
 ![](/exercises/ex5/images/5.3.1-price_data_region_rnk.png)
 <br>
 
-Next, we want to sample the last week period of our time series fuel price data  as our time series test data, to evaluate the forecast quality.
+Next, we want to sample the last week period of our time series fuel price data to be our time series test data, to evaluate the forecast quality.
 ````Python
 # Identifying the first and last data of our time series
 print( "The dataset covers the time period starting from: ")
@@ -387,7 +388,7 @@ print('Number of forecast testing rows', test_rnk_hdf.count())
 
 __Step 2 - Model the fuel price forecast__  
 The Additive-Model-Analysis (aka prophet) forecasting method allows to add external factor and changepoint information as input to the analysis. Hence it requires us to pass-in a respective table or dataframe with the analysis. We use the dataframe create_table-method, to create the empty holiday-data needed.
-- During table creation using the dataframe-connection creation using __create_table__ method, you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
+- During table creation using the dataframe-connection __create_table__-method, you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
 ````Python
 # Prepare holiday data table (for simplicity an empty table) for the forecast model function
 conn.create_table(
@@ -424,7 +425,7 @@ print(amf.get_fit_execute_statement())
 ![](/exercises/ex5/images/5.3.5-fit_SQLstatement.png)  
 <br>  
 
-How do the AdditiveModelAnalysis segmented models look like?  
+How do the AdditiveModelAnalysis segmented models look like for each station?  
 We can collect the returned "model_"-dataframe from the forecast-fit call.
 ````Python
 # How do the AdditiveModelAnalysis segmented model look like?
@@ -440,7 +441,7 @@ display(df.style.set_properties(**{'text-align': 'left'}))
 
 
 __Step 3 - Forecast prediction and visualization__  
-We now want to apply the trained forecast model for each station and __predict price values for the test period__ and visualize it all.  The AdditiveModelForecast-predict method applies station-specific forecast model to the test_rnk_hdf-dataframe. 
+We now want to apply the trained forecast models for each station and __predict price values for the test period__ and visualize it all.  The AdditiveModelForecast-predict method applies station-specific forecast model to the test_rnk_hdf-dataframe. 
 ````Python
 # The AdditiveModelForecast-PREDICT method returns an array of three dataframes.
 fc_result, fc_decomp, fc_error = amf.predict(data=test_rnk_hdf, key="date", group_key="station_uuid")
@@ -457,7 +458,8 @@ fc_error.head(3).collect()
 ![](/exercises/ex5/images/5.3.7-forecast_prediction.png)
 ![](/exercises/ex5/images/5.3.8-forecast_pred_decomp.png)
 ![](/exercises/ex5/images/5.3.9-forecast_pred_error.png)
-Note a warning message might be given if there is no predict input-data for selected stations (group-ids). You could apply the print(amf.get_predict_execute_statement())-call to review the execute SQL statement for the predict call.  
+Note a warning message might be given if there is no predict input-data for selected stations (group-ids).   
+You could apply the print(amf.get_predict_execute_statement())-call to review the execute SQL statement for the predict call.  
 <br>
 Now, we want to __visualize the forecast data__ for a selected station
 ````Python
@@ -525,13 +527,13 @@ plt.show()
 
 ## Summary
 
-You've now concluded Exercise 5 and successfully station- and region-geo data, used spatial filtering and applied forecasting to fuel price data over a large number of fuel stations.
+You've now concluded exercise 5 and successfully loaded station- and region-geo data, used spatial filtering and applied forecasting to fuel price data over a large number of fuel stations.
 
 Continue now with [Exercise 6](../ex6/README.md) or you may extend with evaluating the forecast accurary in the following section first.
 
 ## Add-on section (optional) - Evaluate Forecast Accuracy<a name="subexADDON"></a>
 
-In order to evaluate the forecast accuracy for each stations's model, we need to comparing predicted forecast values (from the predict-results) with the actual ground-truth e5-values of the test data time period.
+In order to evaluate the forecast accuracy for each stations's model, we need to compare predicted forecast values (from the predict-results) with the actual ground-truth e5-values of the test data time period.
 ````Python
 # Prepare a dataframe with the forecast predictions
 fc_allgroups=fc_result.select('date', 'GROUP_ID', 'YHAT', 'YHAT_LOWER', 'YHAT_UPPER').rename_columns({'YHAT': 'PREDICTED'})
@@ -560,7 +562,7 @@ fc_acc=conn.table('FORECAST_ACCURACY')
 ````
 <br>  
 
-Finally, we caculate the forecast accuracy measture, iterating over each of the 171 gas stations and appending the values to the table previously created.
+Finally, we caculate the forecast accuracy measures, iterating over each of the 171 gas stations and appending the values to the table previously created.
 ````Python
 # Get alls stations uuids into a Python list "stations_all"
 df=testacc_allgroups.distinct('station_uuid').collect()
