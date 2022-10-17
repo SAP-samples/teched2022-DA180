@@ -1,6 +1,6 @@
 # Exercise 5 - Apply Forecasting to multi-model data
 
-In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare assemble geo-located fuel station data of Germany, and apply segmented forecasting techniques using the [Predictive Analysis Library (PAL)]() to build and apply forecast models for each station's "e5" car fuel price.
+In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located fuel station data of Germany, and apply segmented forecasting techniques using the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to build and apply forecast models for each station's "e5" car fuel price.
 
 The exercise is composed from the perspective of a Data Scientist working in a Python (Juypter Notebook) environment, leveraging the [Python Machine Learning client for SAP HANA](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/index.html). For reference information regarding the setup and configuration of your Python environment see [Appendix].
 

@@ -1,48 +1,64 @@
 # Exercise 6 - Build a ML classification model on multi-model data
 
-In this exercise, we will create...
+In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located information about fuel stations in Germany, and make use of Machine Learning classification techniques from the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to model price-class categories for the fuels stations and deduct influence of station attributes incl. spatial attributes and their impact explaining the price-classes.
+
+This exercise builds on top of exercise 5, hence the exercise 5 tasks need to be completed before starting with this section.
+
+The objective and goal for this exercise is
+- in ex 6.1 to build a fuel station price-class label variable based on average e5 fuel-price levels and build station master data- and price-indicator attributes dataframes
+- in ex 6.2 to an additional station attribute dataframe with multiple geo-location derived attributes
+- in ex 6.3 to build a station price-class classification model, review feature influence (esp. of spatial features) on the price-class labels.
+
+As an extra and optional exercise, the [add-on section]() describes how to evaluate, store and debrief the classifier model in more detail. Furthermore  an add-on exercise describes how to download German-highway network data and calculate the spatial distance between stations and the next highway.
+
+You can approach the exercises by copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here]().
 
 ## Exercise 6.1 Prepare and explore fuel station classification data<a name="subex1"></a>
 
-After completing these steps you will have created...
+__Step 1 - Create the classification label-column__  
+Using an advanced SQL statement, we define a HANA dataframe with the STATION_CLASS target column, deriving a station's fuel price class from it's average daily-average e5 price.
 
-STEP 1 - Click here.
-
-Text
 ````Python
 # Creating a station price class type label "STATION_CLASS", derived from daily average e5-price
 stations_class=conn.sql(
 """
 SELECT "station_uuid", E5_AVG, BINNING(VALUE => E5_AVG, BIN_COUNT => 10) OVER () AS STATION_CLASS 
   FROM ( SELECT  "station_uuid",  avg("e5") AS E5_AVG 
-         FROM (  SELECT "date", DAY, HOUR, "station_uuid", "e5" 
+         FROM (  SELECT "station_uuid", "date", 
+	                      EXTRACT(DAY FROM "date")||'-'||EXTRACT(MONTH FROM "date")||'-'||EXTRACT(YEAR FROM "date") AS "DAY", 
+	                      HOUR("date") as HOUR, 
+                          "e5", "e5change"
                  FROM  RAW_DATA.GAS_PRICES_ANALYSIS 
                  WHERE  "e5" > 1.3 AND "e5" < 2.8)
          GROUP BY "station_uuid" 
-         HAVING COUNT("e5")>20);
+         HAVING COUNT("e5")>20);  
 """
 )
 stations_class.collect() 
 
 ````
-<br>![](/exercises/ex6/images/6.1.1-stations_target.png)
+![](/exercises/ex6/images/6.1.1-stations_target.png)
+<br>  
 
+__Step 2 - Create the station master attributes dataframe__  
+Create a HANA dataframe, with key master attributes of potential interest and relation to the price-level classification. As the five digit postal code might be too detailed feature, we are abstracting it to the first two and three digits of the postal code, indicating more regional than local aspect.
 
-Text
 ````Python
 # Create station masterdata HANA dataframe: station_master
 stations_hdf = conn.table("GAS_STATIONS")
 
-#print("There are", stations_hdf.count(), "service stations in Germany")
-#display(stations_hdf.head(3).collect())
-
-station_master=stations_hdf.select('uuid', 'brand', 'post_code', ('substr("post_code",1,2)', 'post_code2'), 'city')
-display(station_master.head(3).collect()) 
-
+station_master=stations_hdf.select('uuid', 'brand', ('substr("post_code",1,2)', 'post_code2'), 
+                                   ('substr("post_code",1,3)', 'post_code3'), 'city')
+display(station_master.head(3).collect())
 ````
-<br>![](/exercises/ex6/images/6.1.2-stations_master.png)
+![](/exercises/ex6/images/6.1.2-stations_master.png)  
 
-Text
+<br>
+
+__Step 3 - Create the station price-level indicator attributes dataframe__  
+In this dataframe, based on a complex SQL statement, we derive some station-related e5-price indicator attributes like
+- *_E5C_D as daily "e5change"-count derived indicators (sum, min, ....)
+- *_E5_D as aggregates (AVG, SUM) over aggregated (VAR, STDDEV, MIN, ..) daily e5-values
 ````Python
 # Derive some station-related e5-price indicators in a HANA dataframe: stations_price_indicators
 stations_price_indicators=conn.sql(
@@ -60,19 +76,23 @@ SELECT "station_uuid",
                 count("e5change") AS N_E5C_D, VAR("e5") AS VAR_E5_D,  STDDEV("e5") AS STDDEV_E5_D,  MIN("e5") AS MIN_E5_D, 
                 MAX("e5") AS MAX_E5_D, AVG("e5") AS AVG_E5_D, MAX("e5")-MIN("e5") AS RANGE_E5_D
           FROM (
-                  SELECT "date", DAY, HOUR, "station_uuid", "e5", "e5change" 
-                  FROM  RAW_DATA.GAS_PRICES_ANALYSIS 
+                  SELECT "station_uuid", "date", 
+	                      EXTRACT(DAY FROM "date")||'-'||EXTRACT(MONTH FROM "date")||'-'||EXTRACT(YEAR FROM "date") AS "DAY", 
+	                      HOUR("date") as HOUR, 
+                          "e5", "e5change"
+                  FROM  "TECHED_USER_999"."GAS_PRICES"  
                   WHERE  "e5" > 1.3 AND "e5" < 2.8)
           GROUP BY "station_uuid", DAY)
     GROUP BY "station_uuid";
 """
 )
 stations_price_indicators.head(3).collect() 
-
 ````
-<br>![](/exercises/ex6/images/6.1.3-stations_price_indicators.png)
+![](/exercises/ex6/images/6.1.3-stations_price_indicators.png)
+<br>  
 
-Text
+As there is the potential risk of information leakage from indicators to the model target, if any of the indicators show a high correlation with the target column price_class (which has been derived from average price-class levels), we want evaluate the numeric feature correlations.
+
 ````Python
 # Evaluate correlation of indicators with AVG(e5) and thus target class
 
@@ -91,28 +111,27 @@ ax1, corr = eda.correlation_plot(data=stations_num.drop('station_uuid'), cmap="B
 plt.show() 
 
 ````
-<br>![](/exercises/ex6/images/6.1.4-stations_price_indicators_corr.png)
+![](/exercises/ex6/images/6.1.4-stations_price_indicators_corr.png)
+<br>  
 
-Text
+Due to high correlation with the "E5_AVG" column and intercorrelations (values higher than 0.5), we will exclude a number of features from the price indicators_dataframe.
+
 ````Python
 # Drop high correlated indicator columns
 stations_price_indicators=stations_price_indicators.drop('AVG_E5_MIN').drop('AVG_E5_MAX').drop('SUM_E5C').drop('AVG_E5C')
 stations_price_indicators=stations_price_indicators.drop('AVG_E5_STD').drop('SUM_E5_RANGE').drop('AVG_E5_RANGE')
 stations_price_indicators.head(3).collect() 
-
 ````
-<br>![](/exercises/ex6/images/6.1.5-stations_price_indicators_fin.png)
-
-
+![](/exercises/ex6/images/6.1.5-stations_price_indicators_fin.png)  
+<br>
 
 
 
 ## Exercise 6.2 Enrich fuel station classification data with spatial attributes<a name="subex2"></a>
 
-After completing these steps you will have...
-
-STEP 1 -	Enter this code.
-Text
+At first, we will driven a __data-driven spatial hierarchy__ from the stations point locations using its geohashes. 
+- Geohashes are unique hash-values derived from geo-locations, by ommitting trailing values from the 20 character hash-string. Simply a rectangle represented by the first 5 characters of the geohash, is guaranteed to contain to any rectangle / point represented by the same first 5 + n characters geohash.
+- The generated_feature dataframe functions allows to generate a hierarchy geohash features.
 ````Python
 # Create a station spatial hierarchy HANA dataframe
 stations_spatialhierarchy = stations_hdf.select('uuid', 'longitude','latitude','longitude_latitude_GEO')
@@ -130,14 +149,16 @@ stations_spatialhierarchy=stations_spatialhierarchy.rename_columns({'GEOHASH_HIE
                                                                       )
 
 stations_spatialhierarchy.head(2).collect() 
-
 ````
-<br>![](/exercises/ex6/images/6.2.1-stations_patialhierarchy.png)
+![](/exercises/ex6/images/6.2.1-stations_patialhierarchy.png)  
+<br>  
 
-Text
+Next, each __stations closest distance to the network of highways__ in Germany as been pre-calcualted and can be imported from the file stations_hwaydist.csv
+- Note in the [add-on exercises section]() it is described, how the Germany highway network can be imported using the OpenStreetMap network Python interface OSMNX, imported as HANA graph, a Multilinestring created for the complete highway network and the distance calculated.
+
 ````Python
 # Import station distance to nearest highway and join with spatial hierarchy data
-stations_hwaydist_pd = pd.read_csv('./stations_hwaydist.csv', sep=',', header=0, skiprows=1,
+stations_hwaydist_pd = pd.read_csv('./data/fuelprice/stations_hwaydist.csv', sep=',', header=0, skiprows=1,
                                       names=["idx", "uuid", "HIGHWAY_DISTANCE"],
                                       usecols=["uuid", "HIGHWAY_DISTANCE"])
 stations_hwaydist2 = create_dataframe_from_pandas(
@@ -157,10 +178,10 @@ stations_spatial_attributes=stations_spatialhierarchy.set_index("uuid").join(sta
 display(stations_spatial_attributes.collect()) 
 
 ````
-<br>![](/exercises/ex6/images/6.2.2-stations_spatial_distance.png)
+![](/exercises/ex6/images/6.2.2-stations_spatial_distance.png)  
+<br>
 
-
-Text
+Finally we spatially join the stations spatial attributes dataframe with the German-region "Landkreise" shape and select __relevant region attributes__.
 ````Python
 # Create station spatial dataframe joining spatial hierachy and regions attributes
 regions_hdf = conn.table("GEO_GERMANY_REGIONS")
@@ -170,18 +191,17 @@ stations_spatial = stations_spatial_hierarchy.join(regions_hdf.select('lan_name'
        '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1')
 
 stations_spatial.drop('SHAPE').head(5).collect() 
-
 ````
-<br>![](/exercises/ex6/images/6.2.3-stations_spatial_attributes.png)
+![](/exercises/ex6/images/6.2.3-stations_spatial_attributes.png)   
+<br>
 
 
 
 ## Exercise 6.3 Build fuel station classification model and evaluate impact of attributes<a name="subex3"></a>
 
+__Step 1 - Create the station classification HANA dataframe__  
+For conveniance, we first save the station dataframes as local temporary tables in SAP HANA.
 
-STEP 1 -	Click here.
-
-Text
 ````Python
 #Save station attributes dataframes to temporary HANA tables
 stations_class.drop('E5_AVG').save('#STATION_CLASS', force=True)
@@ -193,13 +213,13 @@ stations_spatial.drop('longitude_latitude_GEO').drop('SHAPE').save('#STATION_SPA
 <br>![](/exercises/ex6/images/02_019_0010.png)
 
 
-Text
+Using an advance join SQL statement of all the attributes temporary table, we create the stations priceclass dataframe.
 ````Python
 # Build the classification training data HANA dataframe
 stations_priceclass=conn.sql(
 """
-SELECT M."uuid", "brand", "post_code", "post_code2", "city", 
-       "longitude", "latitude", "GEO_H3", "GEO_H4", "GEO_H5", "GEO_H6", "GEO_H7", "lan_name", "krs_name", "krs_type",
+SELECT M."uuid", "brand", "post_code2", "post_code3", "city", 
+       "longitude", "latitude", "GEO_H3", "GEO_H4", "GEO_H5", "lan_name", "krs_name", "krs_type",
        S.HIGHWAY_DISTANCE,
        "MIN_E5C", "MAX_E5C", "STDEV_E5C", "RANGE_E5C", "AVG_E5_VAR",  
        "STATION_CLASS"
@@ -216,10 +236,10 @@ stations_priceclass.head(3).collect()
 #print(stations_priceclass.columns)
 
 ````
-<br>![](/exercises/ex6/images/6.3.1-price_class_dataset.png )
+<br>![](/exercises/ex6/images/6.3.1-price_class_dataset.png )  
 
 
-Text
+Which we then save to as our model development base dataset.
 ````Python
 # Save station classification dataset to HANA column table
 stations_priceclass.save('STATION_PRICECLASSIFICATION', force=True)
@@ -231,7 +251,8 @@ gas_station_class_base.head(5).collect()
 <br>![](/exercises/ex6/images/6.3.2-price_class_basetable.png)
 
 
-Text
+__Step 2 - Splitting up our model development base dataset__  
+In order to validate during training and test our finally derived classification model on data not used during training, we split up or base data set into train-, validation- and test-subsets.
 ````Python
 # Split the station classification dataframe into a training and test subset
 from hana_ml.algorithms.pal.partition import train_test_val_split
@@ -243,41 +264,111 @@ df_train, df_test, _ = train_test_val_split(data=gas_station_class_base, id_colu
 
 df_train.describe().collect()
 #print(df_train.describe().select_statement) 
-
 ````
-<br>![](/exercises/ex6/images/6.3.3-price_train_describe.png)
+![](/exercises/ex6/images/6.3.3-price_train_describe.png)
+As the describe column report of our training subset shows, some of the columns contains null values (brand, post_code). During model training, we will take of this.   
+  
+<br>
 
+In order to validate our trained model, with the previous step determined validation subset, we union both dataframes to be trianing input.
+````Python
+ # Union train and validation data into one set
+df_trainval=df_train.select('*', ('1', 'TRAIN_VAL_INDICATOR' )).union(df_val.select('*', ('2', 'TRAIN_VAL_INDICATOR' )))
 
-Text
+display(df_trainval.head(5).collect())
+
+```` 
+<br>![](/exercises/ex6/images/6.3.4-###.png)
+
+__Step 3 - Train the station price-class classification model__  
+We now use the [PAL Unified Classification method](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/hana_ml.algorithms.pal_algorithm.html?highlight=unified%20classification#module-hana_ml.algorithms.pal.unified_classification), to train a [HybridGradientBoostingTree](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/ca5106cbd88f4ac69e7538bbc6a059ea.html?locale=en-US) classifier model.
 ````Python
 # Train the Station classifer model using PAL HybridGradientBoostingTree
-
 from hana_ml.algorithms.pal.unified_classification import UnifiedClassification
 
 # Define the model object 
 hgbc = UnifiedClassification(func='HybridGradientBoostingTree',
-                            n_estimators = 100, split_threshold=0.1,
+                            n_estimators = 101, split_threshold=0.1,
                           learning_rate=0.5,
           fold_num=5, max_depth=5,
-          evaluation_metric = 'error_rate', ref_metric=['auc'])
+          evaluation_metric = 'error_rate', ref_metric=['auc'],
+                            thread_ratio=1.0)
 
 # Execute the training of the model
-hgbc.fit(data=df_train, key= 'uuid',
-         label='STATION_CLASS', ntiles=20, impute=True, build_report=True)
+hgbc.fit(data=df_trainval, key= 'uuid',
+         label='STATION_CLASS', categorical_variable='STATION_CLASS',
+         impute=True, strategy='most_frequent-mean',
+         ntiles=20,  build_report=True,
+         partition_method='user_defined', purpose='TRAIN_VAL_INDICATOR' )
 
 display(hgbc.runtime)
 
 # Explore the feature importance result
-display(hgbc.importance_.sort('IMPORTANCE', desc=True).collect().set_index('VARIABLE_NAME')) 
+#display(hgbc.importance_.sort('IMPORTANCE', desc=True).collect().set_index('VARIABLE_NAME')) 
+````
+![](/exercises/ex6/images/6.3.4-feature_importanceXYZ.png)  
+
+<br>
+
+__Step 4 - Explore the model report and attribute importance__  
+We now us
+Using the __model report__, we can now explore training and validation model performance statistics, confusion matrix, explore feature importance and classification metric reports like ROC, gain or lift charts.
+````Python
+# Build Model Report
+from hana_ml.visualizers.unified_report import UnifiedReport
+UnifiedReport(hgbc).build().display()
 
 ````
-<br>![](/exercises/ex6/images/6.3.4-feature_importance.png)
+![](/exercises/ex6/images/6.3.4-model_report1.png)  
+  
+  <br>
+
+Finally, looking the __feature importance__-section of the report, the relative importance of all attributes explaining and contributing to the models global classification performance is reported.
+- __geo-location derived attributes__ like highway distance, are amongst the __top__ influencing attributes
+![](/exercises/ex6/images/6.3.11-modelreport_varimportance.png)  
+
+<br>
 
 
-Text
+Applying the __model PREDICT-method__ with potential new station data, our test-data or any stations data, beside the models predicted classification for a station, we can review a __station's attributes value importance with respect to the predicted classification__ (local feature importance or explainability) in the REASON_CODE column output.
+````Python
+# Explore test data-subset predictions applying the trained model
+features = df_test.columns
+features.remove('STATION_CLASS')
+features.remove('uuid')
+
+# Using the predict-method with our model object hgbc
+pred_res = hgbc.predict(df_test.head(100), key='uuid', features=features, impute=True )
+
+# Review the predicted results
+pd.set_option('max_colwidth', None)
+pred_res.select('uuid', 'SCORE', 'CONFIDENCE', 'REASON_CODE', 
+                ('json_query("REASON_CODE", \'$[0].attr\')', 'Top1'), 
+                ('json_query("REASON_CODE", \'$[0].pct\')', 'PCT_1') ).head(3).collect() 
+
+````
+![](/exercises/ex6/images/6.3.7-pred_results.png)  
+
+<br>
+ 
+
+
+## Summary
+
+You've now concluded the last exercise, congratulations! 
+
+
+  
+
+<br>
+
+## Optional Add-on exercises
+
+## Score and debrief model
+Using the Unified Classification-SCORE method, we can now benchmark and test our models generalization against data completely unseen during model development.
 ````Python
 # Test model generalization using the test data-subset, not used during training
-scorepredictions, scorestats, scorecm, scoremetrics = hgbc.score(data=df_test , key= 'uuid', label='STATION_CLASS', 
+scorepredictions, scorestats, scorecm, scoremetrics = hgbc.score(data=.fillna('missing').head(100) , key= 'uuid', label='STATION_CLASS', 
                                                                  ntiles=20, impute=True)
 #display(hgbc.runtime)
 display(scorestats.sort('CLASS_NAME').collect())
@@ -289,29 +380,7 @@ display(scoremetrics.collect())
 <br>![](/exercises/ex6/images/6.3.6-score_cm_cummetrics.png)
 
 
-Text
-````Python
-# Explore test data-subset predictions applying the trained model
-features = df_test.columns
-features.remove('STATION_CLASS')
-features.remove('uuid')
-
-# Using the predict-method with our model object hgbc
-pred_res = hgbc.predict(df_test, key='uuid', features=features, impute=True )
-
-#display(hgbc.runtime)
-
-# Review the predicted results
-pd.set_option('max_colwidth', None)
-pred_res.select('uuid', 'SCORE', 'CONFIDENCE', 'REASON_CODE', 
-                ('json_query("REASON_CODE", \'$[0].attr\')', 'Top1'), 
-                ('json_query("REASON_CODE", \'$[0].pct\')', 'PCT_1') ).head(3).collect() 
-
-````
-<br>![](/exercises/ex6/images/6.3.7-pred_results.png)
-
-
-Text
+The Shapley explainer plot, shows the distribution each feature has on the model predictions.
 ````Python
 #  Show the distribution of the impacts each feature has on the model output using Shapley ML explainability values 
 import pydotplus
@@ -336,83 +405,86 @@ shapley_explainer.force_plot()
 <br>![](/exercises/ex6/images/6.3.9-shapley_local.png)
 
 
-Text
+
+## Store model and retrieve stored models and model reports
+Using the ModelStorage methods, we can store and retrieve models and model performance reports from a given storage schema.
 ````Python
-# Save Models and Model Quality Information to MLLAB-Sandbox
+# Initiate ModelStorage location
 from hana_ml.model_storage import ModelStorage
+MLLAB_models = ModelStorage(connection_context=conn, schema="TECHED_USER_###")
 
-MLLAB_models = ModelStorage(connection_context=conn)
-
+#Describe and save current model
 hgbc.name = 'STATION PRICE-CLASS CLASSIFIER MODEL' 
 hgbc.version = 1
-
 MLLAB_models.save_model(model=hgbc) 
 
 ````
 
 
+````Python
+# List stored models
+list_models = MLLAB_models.list_models()
+display(list_models) 
+````
+![](/exercises/ex6/images/6.3.10-modelstorage_listmodel.png)  
+<br>
 
-Text
+
+At a later point in time, we can reconnect to the ModelStorage schema, retrieve stored models and revisit model reports.
 ````Python
 # Retrieve model from ModelStorage location
 from hana_ml.model_storage import ModelStorage
-MLLAB_models = ModelStorage(connection_context=conn)
+MLLAB_models = ModelStorage(connection_context=conn, schema="TECHED_USER_###")
 
-list_models = MLLAB_models.list_models()
-display(list_models) 
-
-````
-<br>![](/exercises/ex6/images/6.3.10-modelstorage_listmodel.png)
-
-
-Text
-````Python
 # Reload model from ModelStorage
 mymodel = MLLAB_models.load_model('STATION PRICE-CLASS CLASSIFIER MODEL', 1)
 
 # Predict with reloaded model
-pred_results=mymodel.predict(data=df_test, key='uuid', features=features, impute=True)
+pred_results=mymodel.predict(data=df_test.head(10), key='uuid', features=features, impute=True)
 
 # Build Model Report
 from hana_ml.visualizers.unified_report import UnifiedReport
 UnifiedReport(mymodel).build().display() 
 
 ````
-<br>![](/exercises/ex6/images/6.3.11-modelreport_varimportance.png)
+<br>![](/exercises/ex6/images/6.3.11-modelreport.png)
 
 
-Text
+As needed, models and the complete model storage can be deleted as needed and database authorizations allow for.
 ````Python
 # CleanUp Model Storage
 MLLAB_models.delete_models(name='STATION PRICE-CLASS CLASSIFIER MODEL')
 MLLAB_models.clean_up() 
-
 ````
+  
+  <br>  
 
 
-<br>![](/exercises/ex6/images/02_019_0010.png)
 
-## Reference section - Use OSMNX to import German Highway network and calculate spatial distance btw station and next highway<a name="subex6.4"></a>
 
-OSMnx is a Python package that lets you download geospatial data from OpenStreetMap and model, project, visualize, and analyze real-world street networks and any other geospatial geometries. You can download and model walkable, drivable, or bikeable urban networks with a single line of Python code then easily analyze and visualize them. You can just as easily download and work with other infrastructure types, amenities/points of interest, building footprints, elevation data, street bearings/orientations, and speed/travel time.See https://osmnx.readthedocs.io/en/stable/index.html for reference details.
+## Use OSMNX to import German Highway network and calculate spatial distance btw station and next highway<a name="subex6.4"></a>
 
-Text
+OSMNX is a Python package that lets you download geospatial data from OpenStreetMap and model, project, visualize, and analyze real-world street networks and any other geospatial geometries. You can download and model walkable, drivable, or bikeable urban networks with a single line of Python code then easily analyze and visualize them. You can just as easily download and work with other infrastructure types, amenities/points of interest, building footprints, elevation data, street bearings/orientations, and speed/travel time.See https://osmnx.readthedocs.io/en/stable/index.html for reference details.
+
+There are multiple methods to download street network data, like  "graph from place" or "graph from polygon".  
+! Be careful, downloading the german highway network via OSMNX takes multiple hours.  
+! There if you seek to explore this section, try out the next step and download only the highway network for a single region instead.
 ````Python
 %%time
 import osmnx as ox
-# !!careful, downloading the german highway network via OSMNX takes multiple hours
-# If you want to try this out, try out the next step instead download the highway network for a single region
 
 # Use OSMNX-method to download network graph from "place"
 ox.config(use_cache=True, log_console=True)
 cf = '["highway"~"motorway"]'
-#g =  ox.graph_from_place('Germany', network_type = 'drive', custom_filter=cf) 
 
+#! Be careful, downloading the german highway network via OSMNX takes multiple hours.  
+#! There if you seek to explore this section, try out the next step and download only the highway network for a single region instead.
+
+#g =  ox.graph_from_place('Germany', network_type = 'drive', custom_filter=cf) 
 ````
 
-Text
+Use OSMNX to download only the highway network for a single region.
 ````Python
-
 %%time
 import osmnx as ox
 hdf_RNK_SHAPE = stations_spatial.filter("\"krs_name\"='Landkreis Rhein-Neckar-Kreis'" ).select('uuid','krs_name', 'SHAPE').head(1)
@@ -428,30 +500,28 @@ ox.config(use_cache=True, log_console=True)
 cf = '["highway"~"motorway"]'
 g = ox.graph_from_polygon(polygon = gdf_RNK_SHAPE['geometry'][0], network_type = 'drive',custom_filter=cf)
 #fig, ax = ox.plot_graph(g, fig_height=5) 
-
 ````
-Text
+Check if the network graph object has been successfully downloaded and stored as dataframe "g" 
 ````Python
 # Check successful object download
 g
 
 # Plot OSMNX highway network graph data
 fig, ax = ox.plot_graph(g)
-
 ````
-<br>![](/exercises/ex6/images/6.2.4-osmx_highway_plot.png)
+![](/exercises/ex6/images/6.2.4-osmx_highway_plot.png)
 
-Text
+Load graph nodes and edges into geopandas dataframes
 ````Python
 # Create geodataframes from network graph
 gdf_nodes,gdf_edges = ox.graph_to_gdfs(g, nodes=True, edges=True)
 gdf_edges
-
-
 ````
-<br>![](/exercises/ex6/images/6.2.5-gdf_edges.png)
+<br>![](/exercises/ex6/images/6.2.5-gdf_edges.png)  
 
-Text
+<br>
+
+In order to load the graph dataframes into SAP HANA, the network arrays from the geopandas dataframe require to be str-column converted into pandas dataframes
 ````Python
 # Convert network arrays to str-column format for the pandas dataframe
 gdf_edges['ID'] = np.arange(len(gdf_edges))
@@ -463,10 +533,12 @@ gdf_edges['highway']=gdf_edges['highway'].astype(str)
 pd_edges=pd.DataFrame(gdf_edges, copy=True)[['ID', 'osmid', 'geometry', 'highway','ref']]
 pd_edges.head(5)
 ````
-<br>![](/exercises/ex6/images/6.2.6-pd_edges.png)
+![](/exercises/ex6/images/6.2.6-pd_edges.png)  
+
+<br>
 
 
-Text
+Create the HANA dataframe for the street network edges
 ````Python
 # Create a HANA dataframe from the German highway-network edges pandas dataframe 
 from hana_ml.dataframe import create_dataframe_from_pandas
@@ -482,11 +554,11 @@ hdf = create_dataframe_from_pandas(
 
 german_highways = conn.sql('select * from "TECHED_USER_999"."GEO_GERMANY_HIGHWAYS"')
 german_highways.head(3).collect()
-
 ````
-<br>![](/exercises/ex6/images/6.2.7-german_highway_edges_hdf.png)
+![](/exercises/ex6/images/6.2.7-german_highway_edges_hdf.png)  
+<br>
 
-Text
+In order to calculate the distance btw station and Germany highway network, we create a list or German region "Landkreis" area, so we calculate the distance in batches of stations within a regional area.
 ````Python
 # Prepare a list of all krs_mame values for the distance calculation
 df=stations_spatial.distinct('krs_name').collect()
@@ -496,7 +568,10 @@ print(sorted(krs))
 <br>![](/exercises/ex6/images/6.2.8-german_landkreis_liste.png)
 
 
-Text
+Using this SQL statements
+- we precalculate a single multilinestring for the complete German highway network
+- then calculate the distance between the multilinestring and the station points using the HANA spatial function ST_DISTANCE, we select the stations in batches of "Landkreis" regions
+- store the calculated disctance to a table
 ````SQL
 /*** SQL **************************************************************************************/
 /* Calculate single Highway-Multilinestring from Highway network into temporary table #HWL */
@@ -508,7 +583,7 @@ INSERT INTO #HWL
 						SELECT "highway", replace(agg , 'SRID=4326;LINESTRING ', ', ') AS LSTRING
 						FROM (
 								SELECT "highway",  STRING_AGG("geometry_GEO") AS agg 
-								FROM RAW_DATA.GEO_GERMANY_HIGHWAYS 
+								FROM TECHED_USER_999.GEO_GERMANY_HIGHWAYS 
 								WHERE substr("ref",1,1)='A' AND "highway"='motorway'
 								GROUP BY "highway"
 							)
@@ -536,23 +611,20 @@ from
      #HWL;
 ````
 
-Text
+Finally, we can review the station-highway distances.
 ````Python
 stations_hwaydist=conn.table("STATION_HWAYDIST")
 display(stations_hwaydist.head(5).collect())
 #6.2.9-german_highwaydist.png
-
 ````
-<br>![](/exercises/ex6/images/6.2.9-german_highwaydist.png)
+![](/exercises/ex6/images/6.2.9-german_highwaydist.png)
 
-
-Text
-
-
+<br>
 
 
 
-## Summary
 
-You've now concluded the last exercise, congratulations! 
+
+
+
 
