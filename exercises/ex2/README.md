@@ -6,8 +6,8 @@
 In this exercise, we will look at the public transportation network of Adelaide, Australia, and learn how to run routing/pathfinding queries on this spatio-temporal network. For that, we create the networks edges and vertices from the GTFS data. Then we create a Graph Workspace in SAP HANA and run some "GraphScript" functions, which will answer "shortest path one-to-on" and "top k nearest neighbors" queries.
 
 ## Exercise 2.1 - Transform GTFS data and create a Graph Workspace<a name="subex1"></a>
-So the GTFS data describes a network in which vehicles can take you from a STOP to another at certain times. To query the network for paths, we will use HANA's graph engine. To do that, we will transform the data into a set of EDGES (transport connections) and VERTICES (stops).
-First, we will create EDGES from the STOPTIMES by creating SOURCE/TARGET pairs from subsequent stops of a trip.
+So the GTFS data describes a network in which vehicles can take you from a `STOP` to another at certain times. To query the network for paths, we will use HANA's graph engine. To do that, we will transform the data into a set of `EDGES` (transport connections) and `VERTICES` (stops).
+First, we will create `EDGES` from the `STOPTIMES` by creating `SOURCE`/`TARGET` pairs from subsequent stops of a trip.
 ````SQL
 CREATE COLUMN TABLE "TECHED_USER_000"."EDGES" AS (
 	SELECT "trip_id" , "SOURCE", "dep_time", "TARGET", "arr_time", 'transport' AS "transfer_type" FROM (
@@ -19,10 +19,10 @@ CREATE COLUMN TABLE "TECHED_USER_000"."EDGES" AS (
 	WHERE "TARGET" IS NOT NULL AND "dep_time" IS NOT NULL AND "arr_time" IS NOT NULL
 );
 ````
-The EDGES table contains data about which TRIP takes you from a SOURCE (i.e. a stop) to a TARGET (i.e. the next stop). We have also added some additional columns, e.g. "diff_sec" which indicates how many seconds it takes to "traverse" this EDGE.
+The `EDGES` table contains data about which `TRIP` takes you from a `SOURCE` (i.e. a stop) to a `TARGET` (i.e. the next stop). We have also added some additional columns, e.g. `diff_sec` which indicates how many seconds it takes to "traverse" this `EDGE`.
 ![](images/edges1.png)
 
-At this point, our network is just connected via STOPs, so we can change vehicles only if the share a STOP. But we can also walk, right? Let's add some data to the EDGES table by connecting STOPs which are closer than 500m. For simplicity reasons we just calculate the airline distance. In a real scenario we would calculate the walking distance.
+At this point, our network is just connected via `STOP`s, so we can change vehicles only if the share a `STOP`. But we can also walk, right? Let's add some data to the `EDGES` table by connecting `STOP`s which are closer than 500m. For simplicity reasons we just calculate the airline distance. In a real scenario we would calculate the walking distance.
 ````SQL
 DO() BEGIN
 	T_AllPairs = SELECT STO1."stop_id" AS "SOURCE", STO2."stop_id" AS "TARGET", STO1."SHAPE_28354".ST_DISTANCE(STO2."SHAPE_28354") AS "distance"
@@ -33,11 +33,11 @@ DO() BEGIN
 	 	FROM :T_AllPairs WHERE "SOURCE" != "TARGET";
 END;
 ````
-Our "walk" EDGES don't have a trip_id, and no departure or arrival time. But we can derive "diff_sec" from the "distance". The assumption is that we can walk about 1.2m per second.
+Our `transfer_type` = 'walk' `EDGES` don't have a `trip_id`, and no departure or arrival time (`dep_time`, `arr_time`). But we can derive `diff_sec` from the `distance`. The assumption is that we can walk about 1.2m per second.
 ![](images/edges2.png)
 
 
-Finally, we will also connect the POIs to our network. The query below is similar to the last one and adds an EDGE from a STOP to a POI.
+Finally, we will also connect the POIs to our network. The query below is similar to the last one and adds an `EDGE` from a `STOP` to a `POI`.
 ````SQL
 DO() BEGIN
 	T_AllPairs = SELECT STO."stop_id" AS "SOURCE", POI."id" AS "TARGET", STO."SHAPE_28354".ST_DISTANCE(POI."SHAPE_28354") AS "distance"
@@ -48,9 +48,9 @@ DO() BEGIN
 	 	FROM :T_AllPairs WHERE "SOURCE" != "TARGET";
 END;
 ````
-Our final EDGES table contains over 700k "transport" connections and over 200k "walk" connections.
+Our final `EDGES` table contains over 700k 'transport' connections and over 200k 'walk' connections.
 
-Now let's create the graph's VERTICES. We'll use a view to union the STOPS and the POIs.
+Now let's create the graph's `VERTICES`. We'll use a view to union the `STOPS` and the `POIS`.
 ````SQL
 CREATE OR REPLACE VIEW "TECHED_USER_000"."V_VERTICES" AS (
 	SELECT "stop_id" AS "ID", 'stop' AS "TYPE", 'stop' AS "POI_TYPE", "stop_name" AS "NAME", "SHAPE_28354" FROM "TECHED_USER_000".GTFS_STOPS
@@ -58,14 +58,14 @@ CREATE OR REPLACE VIEW "TECHED_USER_000"."V_VERTICES" AS (
 	SELECT "id" AS "ID", 'poi' AS "TYPE", "tags.amenity" AS "POI_TYPE", "tags.name" AS "NAME", "SHAPE_28354" FROM "TECHED_USER_000".POIS
 );
 ````
-The VERTCIES data looks like this. We got "poi" and "stop" type of vertices, a "NAME" column and a geolocation.
+The `VERTCIES` data looks like this. We got 'poi' and 'stop' `TYPE` of vertices, a `NAME` column and a geolocation.
 ![](images/vertices1.png)
 
-Looking at the "POI_TYPE" we see the following distribution in the VERTICES table.
+Looking at the `POI_TYPE` we see the following distribution in the `VERTICES` table.
 
 ![](images/vertices2.png)
 
-Last task is to create a GRAPH WORKSPACE to expose the network to the graph engine.
+Last task is to create a `GRAPH WORKSPACE` to expose the network to the graph engine.
 ````SQL
 CREATE OR REPLACE GRAPH WORKSPACE "TECHED_USER_000"."GRAPH_GTFS_POIS"
 	EDGE TABLE "TECHED_USER_000"."EDGES"
@@ -78,10 +78,10 @@ CREATE OR REPLACE GRAPH WORKSPACE "TECHED_USER_000"."GRAPH_GTFS_POIS"
 
 ## Exercise 2.2 - Shortest paths and traverse dijkstra<a name="subex2"></a>
 
-The below GraphScript function will find shortest paths in the transportation network. It takes a start vertex, end vertex, and a parameter that indicates the time of our departure (in seconds), and returns a table with the path's edges. Basically, the program just calls the built-in "SHORTEST_PATH" algorithm, but the magic is in the edge weight expression... we need to tell the graph engine
-- that we can only take "transport" connections that are in the future
+The below GraphScript function will find shortest paths in the transportation network. It takes a start vertex, end vertex, and a parameter that indicates the time of our departure (in seconds), and returns a table with the path's edges. Basically, the program just calls the built-in `SHORTEST_PATH` algorithm, but the magic is in the edge weight expression... we need to tell the graph engine
+- that we can only take 'transport' connections that are in the future
 - if we need to wait for a bus, the wait time needs to be added to our overall travel time
-- we can take a "walk" at anytime
+- we can take a 'walk' at anytime
 
 ````SQL
 CREATE OR REPLACE FUNCTION "TECHED_USER_000"."F_SPOO_GTFS_POIS"(
@@ -113,7 +113,7 @@ If we execute this function with specific input, the result looks like this. Fir
 
 ![](images/sp1.png)
 
-Next we want to calculate the travel time from one start vertex to all others. The SHORTEST_PATHS_ONE_TO_ALL built-in algorithm helps us to identify isochrones - areas which can be reached with the same time budget. The magic edge function in the middle is the same as above.
+Next we want to calculate the travel time from one start vertex to all others. The `SHORTEST_PATHS_ONE_TO_ALL` built-in algorithm helps us to identify isochrones - areas which can be reached with the same time budget. The magic edge function in the middle is the same as above.
 ````SQL
 CREATE OR REPLACE FUNCTION "TECHED_USER_000"."F_SPOA_GTFS_POIS"(
 	IN i_startVertex BIGINT, 		-- the ID of the start vertex
@@ -142,7 +142,7 @@ Below are the 7am and 8pm isochrones for our start vertex (large green dot). The
 
 ![](images/spoa2.png)
 
-At the end of this exercise we want to find a pub. Remember that we connected the POI data to the transportation network? Let's explore which POIs are nearby our start location. The function below uses the TRAVERSE DIJKSTRA operator. This allows us to traverse the network in a "shortest path" manner, inspecting each vertex as we traverse. With this approach we can look for the top 5 pubs which we can reach with public transport at 8pm. Again, the edge weight function is the same as above, but we now check each visited vertex if it is a specific POI type ("pub"). If so, we collect the pubs until we found enough (5) and stop execution.
+At the end of this exercise we want to find a pub. Remember that we connected the `POIS` data to the transportation network? Let's explore which POIs are nearby our start location. The function below uses the `TRAVERSE DIJKSTRA` operator. This allows us to traverse the network in a "shortest path" manner, inspecting each vertex as we traverse. With this approach we can look for the top 5 pubs which we can reach with public transport at 8pm. Again, the edge weight function is the same as above, but we now check each visited vertex if it is a specific `POI_TYPE` ('pub'). If so, we collect the pubs until we found enough (5) and stop execution.
 ````SQL
 CREATE OR REPLACE PROCEDURE "TECHED_USER_000"."F_TOP_K_NEAREST_POIS"(
 	IN i_startVertex BIGINT,
@@ -202,6 +202,6 @@ Interestingly, the top 5 clinics are much faster to reach.
 
 ## Summary
 
-You've now ...
+You've now created a network from the GTFS and POI data, and used GraphScript to find paths and neighbors in the network.
 
 Continue to - [Exercise 3 - Import and export spatial vector and raster data, spatial clustering](../ex3/README.md)
