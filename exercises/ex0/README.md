@@ -5,6 +5,7 @@ This section should give you an understanding of the base scenario and data. Add
 ## Base Data & Demo Scenario<a name="subex1"></a>
 
 Graphs describe networks as a set of vertices and edges. The public GTFS data we use in the first exercise describes the public transportation network of Adelaide, Australia. Vehicles are scheduled to go from one stop (a geolocation) to another, departing and arriving at a certain time. Hence, the transportation graph is spatio-temporal. We'll demonstrate some of SAP HANA's Graph engine features to solve routing problems on this graph. Many use cases of other industries are quite similar. Think about production, logistics, utilities, supply chains etc.  
+
 Forecasting and Machine Learning techniques from SAP HANA's Predictive Analysis Library (PAL) will be applied to fuel price- and fuel station data from Germany, where we use multi-model functions like spatial filtering, distance calculation from stations to highway network graph, etc. to enrich the fuel price data to be analyzed and determine potential importance of spatial attributes on price levels.
 
 ## SAP HANA Cloud setup<a name="subex2"></a>
