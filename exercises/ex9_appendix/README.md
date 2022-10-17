@@ -1,6 +1,11 @@
 # Reference - Prepare your Python environment <a name="appA-sub1"></a>
 
-The following  package requirements
+You require to have your __Python Notebook environment__ ready
+- see [Jupyter Notebook](https://jupyter.org/install), [Jupyter Notebook in VS Code]([https://jupyter.org/install](https://code.visualstudio.com/docs/datascience/jupyter-notebooks))as exemplary guidance installing a Jupyter Notebook environment
+
+If you are working on a __MAC with Apple M1 chip__, see this blog for further install guidance [Running hdbcli on an Apple M1 Chip | SAP Blogs](https://blogs.sap.com/2022/04/25/running-hdbcli-on-an-apple-m1-chip/)
+
+The following __python packages and versions__ are required to work through the exercises  
 
 protobuf==3.20.1  
 gtfs-realtime-bindings==0.0.7  
