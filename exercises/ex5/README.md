@@ -329,7 +329,7 @@ __Step 1 - Select the price data for the local region and time range__
 For a more focused analysis, we want to model the forecasts only for the 171 gas stations in the regional area around the SAP headquarters.
 
 ````Python
-# Refelect number of service stations in local regrion close to SAP HQ
+# Reflect number of service stations in local regrion close to SAP HQ
 print("Number of Serice Stations in the Rhein-Neckar area", stations_rnk_hdf.count(), "\n")
 
 # Create a fuel price data HANA dataframe, filtering to local area stations using HANA spatial intersect-filtering
