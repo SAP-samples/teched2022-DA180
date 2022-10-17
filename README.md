@@ -6,11 +6,11 @@ This repository contains the material for the SAP TechEd 2022 session called DA1
 
 ## Overview
 
-This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. In the first part we will mainly work with General Transit Feed Specification ([GTFS](https://gtfs.org/)) data, which describes the **public transportation** of Adelaide, Australia. We 'll show how to do routing in a temporal graph, solving problems like "which bus takes me to the nearest pub?". Next, we'll show some tricks for importing/exporting spatial and graph data. In the second half of this workshop, we will analyze **gas price** data from [Tankerkoenig](https://tankerkoenig.de/), doing forecasts and classification.</br>
+This session introduces attendees to the **multi-model** capabilities in SAP HANA Cloud. In the first part we will mainly work with General Transit Feed Specification ([GTFS](https://gtfs.org/)) data, which describes the **public transportation** of Adelaide, Australia. We 'll show how to do routing in a temporal graph, solving problems like "which bus takes me to the nearest pub?". Next, we'll show some tricks for importing/exporting spatial and graph data. In the second half of this workshop, we will analyze **fuel price** data from Germany, doing forecasts and classification on spatially enriched data.</br>
 
 ## Requirements
 
-Most of the spatial and graph related exercises can be run on an SAP HANA Cloud trial instance, but for the PAL and JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system. Since there is some focus on 3rd party integration when it comes to data import/export, you'd need to install these tools to run the exercises on your own: QGIS, GDAL, DBeaver, Cytoscape.
+Most of the spatial and graph related exercises can be run on an SAP HANA Cloud trial instance, but for the use of the Predictive Analysis Library (PAL) and the JSON Document Store related capabilities you currently would need to work with a "full" SAP HANA Cloud system. Since there is some focus on 3rd party integration when it comes to data import/export, you'd need to install these tools to run the exercises on your own: QGIS, GDAL, DBeaver, Cytoscape.
 
 ## Exercises
 
