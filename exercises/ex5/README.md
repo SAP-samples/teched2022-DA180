@@ -70,8 +70,10 @@ Your project data directory would look like
 
 
 __Step 1 - Import the fuel stations data__  
-Execute the following Python code to import the stations.csv-file into your HANA system
-- Note, replace TECHED_USER_### with your specific / assinged HANA system userid or schema.
+Execute the following Python code to import the stations.csv-file into your HANA system.  
+
+Note, any __uploaded data will be uploaded to the schema of your SAP HANA Cloud connection database userid__. Thus here in this workshop it would for example be user __TECHED_USER_###__ (where ### would need to be replaced with the 3-digits of your specific / assinged HANA system userid or schema).
+- During data upload and dataframe creation using __create_dataframe_from_pandas__  you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
 ````Python
 # load gas station data from csv
 stations_pd = pd.read_csv('./data/fuelprice/stations.csv', sep=',', header=None, skiprows=1,
@@ -82,7 +84,6 @@ stations_pd = pd.read_csv('./data/fuelprice/stations.csv', sep=',', header=None,
 stations_hdf = create_dataframe_from_pandas(
         conn,
         stations_pd,
-        schema='TECHED_USER_###',
         table_name="GAS_STATIONS",
         force=True,
         replace=True,
@@ -102,14 +103,13 @@ The following result will be presented
 
 __Step 2 - Import the Germany "Landkreise"-regions shapefile__  
 Execute the following lines of python code to import the Germany "Landkreise" regional areas shapefile.  
-- Note, replace TECHED_USER_### with your specific / assinged HANA system userid or schema.
+
 ````Python
 # create dataframe from shapefile for german regions "Landreise"
 regions_hdf = create_dataframe_from_shapefile(
   connection_context=conn,
   shp_file='./data/fuelprice/georef-germany-kreis.zip',
   srid=25832,
-  schema='TECHED_USER_###',
   table_name="GEO_GERMANY_REGIONS")
 
 regions_hdf.drop('year').head(5).collect()
@@ -216,7 +216,7 @@ for file in pricefiles:
                                       usecols=["date", "station_uuid", "diesel", "e5", "e10", "dieselchange", "e5change", "e10change"])
     fuelprices_hdf = create_dataframe_from_pandas(
         conn, gp_tmp_pd[file],
-        schema='TECHED_USER_###', table_name="GAS_PRICES",
+        table_name="GAS_PRICES",
         append=True,
         table_structure={"date": "TIMESTAMP", "station_uuid": "NVARCHAR(5000)", 
                          "diesel": "DOUBLE", "e5": "DOUBLE", "e10": "DOUBLE",
@@ -387,14 +387,14 @@ print('Number of forecast testing rows', test_rnk_hdf.count())
 
 __Step 2 - Model the fuel price forecast__  
 The Additive-Model-Analysis (aka prophet) forecasting method allows to add external factor and changepoint information as input to the analysis. Hence it requires us to pass-in a respective table or dataframe with the analysis. We use the dataframe create_table-method, to create the empty holiday-data needed.
+- During table creation using the dataframe-connection creation using __create_table__ method, you can use the schema=-option if you seek to save the table to a different schema than the default user schema.
 ````Python
 # Prepare holiday data table (for simplicity an empty table) for the forecast model function
 conn.create_table(
     table='PAL_ADDITIVE_MODEL_ANALYSIS_HOLIDAY',
-    schema='TECHED_USER_###',
     table_structure={'GROUP_IDXXX': 'INTEGER', 'ts': 'TIMESTAMP', 'NAME': 'VARCHAR(255)', 
                      'LOWER_WINDOW': 'INTEGER', 'UPPER_WINDOW': 'INTEGER'})
-holiday_data_hdf = conn.sql('select * from "TECHED_USER_###"."PAL_ADDITIVE_MODEL_ANALYSIS_HOLIDAY"')
+holiday_data_hdf = conn.sql('select * from "PAL_ADDITIVE_MODEL_ANALYSIS_HOLIDAY"')
 ````
 <br>
 
@@ -554,7 +554,7 @@ display(testacc_allgroups.head(10).collect())
 In order to store the forecast accuracy values for each station, we are preparing a table to store the data.
 ````Python
 # Create a Forecast accuracy-measures table
-conn.create_table(table='FORECAST_ACCURACY',schema='TECHED_USER_999', 
+conn.create_table(table='FORECAST_ACCURACY', 
                  table_structure={'station_uuid': 'NVARCHAR(5000)', 'STAT_NAME': 'NVARCHAR(10)', 'STAT_VALUE': 'DOUBLE'})
 fc_acc=conn.table('FORECAST_ACCURACY')
 ````

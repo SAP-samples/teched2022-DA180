@@ -28,7 +28,7 @@ SELECT "station_uuid", E5_AVG, BINNING(VALUE => E5_AVG, BIN_COUNT => 10) OVER ()
 	                      EXTRACT(DAY FROM "date")||'-'||EXTRACT(MONTH FROM "date")||'-'||EXTRACT(YEAR FROM "date") AS "DAY", 
 	                      HOUR("date") as HOUR, 
                           "e5", "e5change"
-                 FROM  RAW_DATA.GAS_PRICES_ANALYSIS 
+                 FROM  GAS_PRICES 
                  WHERE  "e5" > 1.3 AND "e5" < 2.8)
          GROUP BY "station_uuid" 
          HAVING COUNT("e5")>20);  
@@ -80,7 +80,7 @@ SELECT "station_uuid",
 	                      EXTRACT(DAY FROM "date")||'-'||EXTRACT(MONTH FROM "date")||'-'||EXTRACT(YEAR FROM "date") AS "DAY", 
 	                      HOUR("date") as HOUR, 
                           "e5", "e5change"
-                  FROM  "TECHED_USER_999"."GAS_PRICES"  
+                  FROM  "GAS_PRICES"  
                   WHERE  "e5" > 1.3 AND "e5" < 2.8)
           GROUP BY "station_uuid", DAY)
     GROUP BY "station_uuid";
@@ -164,7 +164,6 @@ stations_hwaydist_pd = pd.read_csv('./data/fuelprice/stations_hwaydist.csv', sep
 stations_hwaydist2 = create_dataframe_from_pandas(
         conn,
         stations_hwaydist_pd,
-        schema='TECHED_USER_999',
         table_name="GAS_STATION_HWAYDIST",
         force=True,
         replace=True,
@@ -244,9 +243,8 @@ Which we then save to as our model development base dataset.
 # Save station classification dataset to HANA column table
 stations_priceclass.save('STATION_PRICECLASSIFICATION', force=True)
 
-gas_station_class_base = conn.table("STATION_PRICECLASSIFICATION", schema="TECHED_USER_999")
+gas_station_class_base = conn.table("STATION_PRICECLASSIFICATION")
 gas_station_class_base.head(5).collect() 
-#print(gas_station_class_base.columns)
 ````
 <br>![](/exercises/ex6/images/6.3.2-price_class_basetable.png)
 
@@ -256,14 +254,13 @@ In order to validate during training and test our finally derived classification
 ````Python
 # Split the station classification dataframe into a training and test subset
 from hana_ml.algorithms.pal.partition import train_test_val_split
-df_train, df_test, _ = train_test_val_split(data=gas_station_class_base, id_column='uuid',
+df_train, df_test, , df_val = train_test_val_split(data=gas_station_class_base, id_column='uuid',
                                             random_seed=2, partition_method='stratified', stratified_column='STATION_CLASS',
-                                            training_percentage=0.75,
-                                            testing_percentage=0.25,
-                                            validation_percentage=0)
+                                            training_percentage=0.70,
+                                            testing_percentage=0.15,
+                                            validation_percentage=0.15)
 
-df_train.describe().collect()
-#print(df_train.describe().select_statement) 
+df_train.describe().collect() 
 ````
 ![](/exercises/ex6/images/6.3.3-price_train_describe.png)
 As the describe column report of our training subset shows, some of the columns contains null values (brand, post_code). During model training, we will take of this.   
@@ -302,9 +299,6 @@ hgbc.fit(data=df_trainval, key= 'uuid',
          partition_method='user_defined', purpose='TRAIN_VAL_INDICATOR' )
 
 display(hgbc.runtime)
-
-# Explore the feature importance result
-#display(hgbc.importance_.sort('IMPORTANCE', desc=True).collect().set_index('VARIABLE_NAME')) 
 ````
 ![](/exercises/ex6/images/6.3.4-feature_importanceXYZ.png)  
 
@@ -317,7 +311,6 @@ Using the __model report__, we can now explore training and validation model per
 # Build Model Report
 from hana_ml.visualizers.unified_report import UnifiedReport
 UnifiedReport(hgbc).build().display()
-
 ````
 ![](/exercises/ex6/images/6.3.4-model_report1.png)  
   
@@ -338,7 +331,7 @@ features.remove('STATION_CLASS')
 features.remove('uuid')
 
 # Using the predict-method with our model object hgbc
-pred_res = hgbc.predict(df_test.head(100), key='uuid', features=features, impute=True )
+pred_res = hgbc.predict(df_test.head(1000), key='uuid', features=features, impute=True )
 
 # Review the predicted results
 pd.set_option('max_colwidth', None)
@@ -370,11 +363,10 @@ Using the Unified Classification-SCORE method, we can now benchmark and test our
 # Test model generalization using the test data-subset, not used during training
 scorepredictions, scorestats, scorecm, scoremetrics = hgbc.score(data=.fillna('missing').head(100) , key= 'uuid', label='STATION_CLASS', 
                                                                  ntiles=20, impute=True)
-#display(hgbc.runtime)
+ 
 display(scorestats.sort('CLASS_NAME').collect())
 display(scorecm.filter('COUNT != 0').collect())
 display(scoremetrics.collect()) 
-
 ````
 <br>![](/exercises/ex6/images/6.3.5-score_stats.png)
 <br>![](/exercises/ex6/images/6.3.6-score_cm_cummetrics.png)
@@ -394,20 +386,13 @@ shapley_explainer.summary_plot()
 <br>![](/exercises/ex6/images/6.3.8-shapley_global.png)
 
 
-Text
-````Python
-# Show the "local" distribution impact of each feature for individual predictions 
-shapley_explainer = TreeModelDebriefing.shapley_explainer(pred_res.head(5), df_test.head(5), 
-                                                          key='uuid', label='STATION_CLASS')
-shapley_explainer.force_plot() 
 
-````
-<br>![](/exercises/ex6/images/6.3.9-shapley_local.png)
 
 
 
 ## Store model and retrieve stored models and model reports
 Using the ModelStorage methods, we can store and retrieve models and model performance reports from a given storage schema.
+- Note, using the schema=-option in the ModelStorage definition, it can be determined on where to save the models. Here, adjust the schema to your  connection database userid.
 ````Python
 # Initiate ModelStorage location
 from hana_ml.model_storage import ModelStorage
@@ -583,7 +568,7 @@ INSERT INTO #HWL
 						SELECT "highway", replace(agg , 'SRID=4326;LINESTRING ', ', ') AS LSTRING
 						FROM (
 								SELECT "highway",  STRING_AGG("geometry_GEO") AS agg 
-								FROM TECHED_USER_999.GEO_GERMANY_HIGHWAYS 
+								FROM GEO_GERMANY_HIGHWAYS 
 								WHERE substr("ref",1,1)='A' AND "highway"='motorway'
 								GROUP BY "highway"
 							)
@@ -596,7 +581,7 @@ SELECT "uuid", "STATION_P".ST_SRID(1000004326).ST_DISTANCE(HIGHWAY_LINE.ST_SRID(
 from
 	(SELECT "uuid", "longitude_latitude_GEO".ST_SRID(4326) AS "STATION_P" 
    		FROM 	(SELECT S."uuid", "longitude_latitude_GEO"
-         		from TECHED_USER_999.STATION_PRICECLASSIFICATION S, TECHED_USER_999.GAS_STATIONS G
+         		from STATION_PRICECLASSIFICATION S, GAS_STATIONS G
          		WHERE S."krs_name" in (
  'Kreis Borken', 'Kreis Coesfeld', 'Kreis Dithmarschen', 'Kreis Düren', 'Kreis Ennepe-Ruhr-Kreis', 'Kreis Euskirchen', 
  'Kreis Gütersloh', 'Kreis Heinsberg', 'Kreis Herford', 'Kreis Herzogtum Lauenburg', 'Kreis Hochsauerlandkreis', 
@@ -615,7 +600,7 @@ Finally, we can review the station-highway distances.
 ````Python
 stations_hwaydist=conn.table("STATION_HWAYDIST")
 display(stations_hwaydist.head(5).collect())
-#6.2.9-german_highwaydist.png
+
 ````
 ![](/exercises/ex6/images/6.2.9-german_highwaydist.png)
 
