@@ -196,7 +196,7 @@ The following map will be shown
 
 ## Exercise 5.2 - Load, prepare and explore fuel price datasets<a name="subex2"></a>
 __Step 1 - Import fuel price csv-files__  
-With the following step, you can import all csv-files from a local folder into a single HANA table represented by a HANA dataframe using the __createcreate_dataframe_from_pandas__-method.   
+With the following step, you can import all csv-files from a local folder into a single HANA table represented by a HANA dataframe using the __create_dataframe_from_pandas__-method.   
 Here it is assumed that each months data is located in one folder. 
 
 Note, the demo screenshots in exercise 5 and 6 may show results based on downloaded data for multiple months in 2022 and thus may differ, if you had only downloaded the September 2022 data.
@@ -441,7 +441,7 @@ display(df.style.set_properties(**{'text-align': 'left'}))
 
 
 __Step 3 - Forecast prediction and visualization__  
-We now want to apply the trained forecast models for each station and __predict price values for the test period__ and visualize it all.  The AdditiveModelForecast-predict method applies station-specific forecast model to the test_rnk_hdf-dataframe. 
+We now want to apply the trained forecast models for each station and __predict price values for the test period__ and visualize it all.  The AdditiveModelForecast-predict method applies station-specific forecast models to the test_rnk_hdf-dataframe. 
 ````Python
 # The AdditiveModelForecast-PREDICT method returns an array of three dataframes.
 fc_result, fc_decomp, fc_error = amf.predict(data=test_rnk_hdf, key="date", group_key="station_uuid")
