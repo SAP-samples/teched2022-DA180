@@ -1,12 +1,12 @@
 # Exercise 6 - Build a ML classification model on multi-model data
 
-In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located information about fuel stations in Germany, and make use of Machine Learning classification techniques from the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to model price-class categories for the fuels stations and deduct influence of station attributes incl. spatial attributes and their impact explaining the price-classes.
+In this exercise, we want to apply SAP HANA Cloud multi-model processing techniques to prepare and assemble geo-located information about fuel stations in Germany, and make use of Machine Learning classification techniques from the [Predictive Analysis Library (PAL)](https://help.sap.com/docs/HANA_CLOUD_DATABASE/319d36de4fd64ac3afbf91b1fb3ce8de/c9eeed704f3f4ec39441434db8a874ad.html?locale=en-US) to model price-class categories for the fuels stations and deduct influence of station attributes (incl. spatial attributes) and their impact explaining the price-classes.
 
 This exercise builds on top of exercise 5, hence the exercise 5 tasks need to be completed before starting with this section.
 
-The objective and goal for this exercise is
-- in ex 6.1 to build a fuel station price-class label variable based on average e5 fuel-price levels and build station master data- and price-indicator attributes dataframes
-- in ex 6.2 to an additional station attribute dataframe with multiple geo-location derived attributes
+The __objective and goals__ for this exercise are
+- in ex 6.1 to build a fuel station price-class label variable based on average e5 fuel-price levels and then define a station master data- and price-indicator attribute dataframe
+- in ex 6.2 to define an additional station attribute dataframe with multiple geo-location derived attributes
 - in ex 6.3 to build a station price-class classification model, review feature influence (esp. of spatial features) on the price-class labels.
 
 As an extra and optional exercise, the [add-on section](/exercises/ex6/README.md#subexAddOn) describes how to evaluate, store and debrief the classifier model in more detail. Furthermore  an add-on exercise describes how to download German-highway network data and calculate the spatial distance between stations and the next highway.
