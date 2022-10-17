@@ -33,7 +33,7 @@ DO() BEGIN
 	 	FROM :T_AllPairs WHERE "SOURCE" != "TARGET";
 END;
 ````
-Our `transfer_type` = 'walk' `EDGES` don't have a `trip_id`, and no departure or arrival time (`dep_time`, `arr_time`). But we can derive `diff_sec` from the `distance`. The assumption is that we can walk about 1.2m per second.
+For the `EDGES` with `transfer_type` = 'walk' we don't have a `trip_id`, and no dparture and arrival time (`dep_time`, `arr_time`).  But we can derive `diff_sec` from the `distance`. The assumption is that we can walk about 1.2m per second.
 ![](images/edges2.png)
 
 
@@ -76,10 +76,10 @@ CREATE OR REPLACE GRAPH WORKSPACE "TECHED_USER_000"."GRAPH_GTFS_POIS"
 		KEY COLUMN "ID";
 ````
 
-## Exercise 2.2 - Shortest paths and traverse dijkstra<a name="subex2"></a>
+## Exercise 2.2 - Shortest paths and `TAVERSE DIJKSTRA`<a name="subex2"></a>
 
-The below GraphScript function will find shortest paths in the transportation network. It takes a start vertex, end vertex, and a parameter that indicates the time of our departure (in seconds), and returns a table with the path's edges. Basically, the program just calls the built-in `SHORTEST_PATH` algorithm, but the magic is in the edge weight expression... we need to tell the graph engine
-- that we can only take 'transport' connections that are in the future
+The below GraphScript function will find shortest paths in the transportation network. It takes a start vertex, end vertex, and a parameter that indicates the time of our departure (in seconds), and returns a table with the path's edges. Basically, the program just calls the built-in `SHORTEST_PATH` algorithm, but the magic is in the edge weight expression which we need to pass to the SHORTEST_PATH algorithm
+- we can only take 'transport' connections that are in the future
 - if we need to wait for a bus, the wait time needs to be added to our overall travel time
 - we can take a 'walk' at anytime
 

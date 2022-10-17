@@ -32,10 +32,24 @@ import hana_ml
 ````
 If you experience challenges with installing the required packages, it is recommended to the following packages from the Python Notebook before you start using the following command 
 ````Python
+
+!pip install protobuf==3.20.1
+!pip install gtfs-realtime-bindings==0.0.7
+!pip install requests
+!pip install protobuf3_to_dict
+!pip install pandas==1.1.2
+!pip install numpy==1.19.5
+!pip install matplotlib==3.5.3
+!pip install graphviz==0.1
+!pip install pydotplus==2.0.2
 !pip install shapely  
 !pip install pipwin  
 !pipwin install gdal  
 !pipwin install fiona  
-!pip install geopandas
+!pip install geopandas==0.10.2
+!pip install osmnx==0.16.0
+!pip install hdbcli==2.14.18
+!pip install hana-ml==2.14.22101400
+
 
 ````

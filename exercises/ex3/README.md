@@ -48,7 +48,7 @@ Exporting HANA data into a file is also easy. Below you see how to export the is
 
 ## Exercise 3.2 - Convert raster data using GDAL<a name="subex2"></a>
 
-It was already mentioned that some georeferenced data comes in form of raster files, i.e. images. For example, Esri provide worldwide population density data in its ["Living Atlas"](https://www.arcgis.com/home/item.html?id=c90197b8948948d7b2194e1b03b11d1e). You'll find a .tif file in the [data folder of this repo](../../data/raster) that contains population density for the Adelaide region. We can simply drag&drop the file into QGIS.
+It was already mentioned that some georeferenced data comes in form of raster files, i.e. images. For example, Esri provides worldwide population density data in its ["Living Atlas"](https://www.arcgis.com/home/item.html?id=c90197b8948948d7b2194e1b03b11d1e). You'll find a .tif file in the [data folder of this repo](../../data/raster) that contains population density for the Adelaide region. We can simply drag&drop the file into QGIS.
 
 ![](images/popdens1.png)
 
@@ -95,7 +95,7 @@ Now we can zoom in to see the individual polygons.
 
 ![](images/polygonize2.png)
 
-## Exercise 3.2 - Spatial clustering<a name="subex3"></a>
+## Exercise 3.3 - Spatial clustering<a name="subex3"></a>
 
 By now we have 3 types of geometries in the database: points (POIs), linestrings (triplines), and polygons (wards). Let's see how we can apply aggregation/clustering methods to derive additional insights.
 - fixed location clustering
@@ -171,7 +171,7 @@ The result looks like this.
 
 ![](images/clus5.png)
 
-The built-in spatial clustering used above support point geometries only. What if you want to count linestrings or polygons intersecting the hexagon cells? Let's say we want to count the number of `TRIPS` that go through an area? For this you can generate a hexagon grid "standalone" and use the `ST_Intersects` method to identify linestrings that intersect the grid cells. The grid generator functions take a geometry which should be covered by the grid.
+The built-in spatial clustering used above supports point geometries only. What if you want to count linestrings or polygons intersecting the hexagon cells? Let's say we want to count the number of `TRIPS` that go through an area? For this you can generate a hexagon grid "standalone" and use the `ST_Intersects` method to identify linestrings that intersect the grid cells. The grid generator functions take a geometry which should be covered by the grid.
 
 ````SQL
 SELECT "I"||'#'||"J" AS "LOCATION_ID", "GEOM" AS "CCELL"
