@@ -2,8 +2,8 @@
 
 The following  package requirements
 
-protobuf==3.20.1
-gtfs-realtime-bindings==0.0.7
+protobuf==3.20.1  
+gtfs-realtime-bindings==0.0.7  
 requests
 protobuf3_to_dict
 pandas==1.1.2  
@@ -18,7 +18,7 @@ hana-ml==2.14.22101400
 
 Prepare
 ````Python
-pip install -r requirements_importet.txt
+pip install -r requirements.txt
 import hana_ml
 
 ````
