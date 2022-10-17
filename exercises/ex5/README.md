@@ -11,7 +11,7 @@ The objective and goal for this exercise is
 
 As an extra and optional exercise, the [add-on section]() describes how to evaluate the forecast model accuracy for all stations forecast models.
 
-You can approach the exercises by  copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here]().
+You can approach the exercises by  copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](https://github.com/SAP-samples/teched2022-DA180/blob/main/exercises/ex5/DA180-Exercise5-Apply%20Forecasting%20to%20multi-model%20data-Student.ipynb).
 
 ## Preparation steps in your Python Jupyter Notebook
 Import the required python packages
