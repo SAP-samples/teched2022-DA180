@@ -40,8 +40,7 @@ Most of the spatial and graph related exercises can be run on an SAP HANA Cloud 
     - [Exercise 6.2 - Enrich fuel station classification data with spatial attributes](exercises/ex6/README.md#subex2)
     - [Exercise 6.3 - Build fuel station classification model and evaluate impact of attributes](exercises/ex6/README.md#subex3)
 - [Appendix - Reference section](exercises/ex9_appendix/)
-    - [Appendix A - Rereference Info 1](exercises/ex9_appendix/README.md#appA-sub1)
-    - [Appendix A - Rereference Info 2](exercises/ex9_appendix/README.md#appA-sub2)
+    - [Reference - Prepare your Python environment](exercises/ex9_appendix/README.md#appA-sub1)
 
 
 ## How to obtain support
