@@ -11,9 +11,9 @@ gtfs-realtime-bindings==0.0.7
 requests
 protobuf3_to_dict  
 shapely  
-pipwin
-gdal
-fiona
+pipwin  
+gdal  
+fiona  
 pandas==1.1.2  
 numpy==1.19.5  
 matplotlib==3.5.3  
