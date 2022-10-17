@@ -9,7 +9,7 @@ The objective and goal for this exercise is
 - in ex 6.2 to an additional station attribute dataframe with multiple geo-location derived attributes
 - in ex 6.3 to build a station price-class classification model, review feature influence (esp. of spatial features) on the price-class labels.
 
-As an extra and optional exercise, the [add-on section](exercises/ex6/README.md#subexAddOn) describes how to evaluate, store and debrief the classifier model in more detail. Furthermore  an add-on exercise describes how to download German-highway network data and calculate the spatial distance between stations and the next highway.
+As an extra and optional exercise, the [add-on section](/exercises/ex6/README.md#subexAddOn) describes how to evaluate, store and debrief the classifier model in more detail. Furthermore  an add-on exercise describes how to download German-highway network data and calculate the spatial distance between stations and the next highway.
 
 You can approach the exercises by copy & paste of the Python code snippets from this document or open the Jupyter Notebook file provided [here](/exercises/ex6/DA180-Exercise6-Build%20a%20ML%20classification%20model%20on%20multi-model%20data-Student.ipynb).
 
