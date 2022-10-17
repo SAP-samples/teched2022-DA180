@@ -1,6 +1,6 @@
 # Exercise 3 - Import and export spatial vector and raster data, spatial clustering
 
-**This page outline the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
+**This page outlines the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
 - The [SQL file](code/2022_Q3_DA180_Ex_3_ImportExportRaster_pub.sql) contains all the statements for this exercise
 
 In this exercise, we will deal with spatial vector and raster data. You can think of vector data as real geometries, e.g. polygons, and there are many file formats for vector data. Probably the most common format is Esri shapefiles. Spatial raster data are images. For each pixel in a spatial image, there is a specific spatial measure, e.g. the elevation or the land use class. Relational databases are not suitable to store images, but there are ways to convert a raster to a vector file.

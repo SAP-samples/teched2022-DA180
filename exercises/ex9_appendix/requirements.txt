@@ -1,11 +1,16 @@
+protobuf==3.20.1
+gtfs-realtime-bindings==0.0.7
+requests protobuf3_to_dict
+shapely
+pipwin
+gdal
+fiona
 pandas==1.1.2
-descartes==1.1.0
-osmnx==0.16.0
-matplotlib==3.5.3
-pyproj==3.2.1
-hdbcli==2.14.18
-pydotplus==2.0.2
 numpy==1.19.5
-graphviz==0.16
+matplotlib==3.5.3
+graphviz==0.1
+pydotplus==2.0.2
 geopandas==0.10.2
+osmnx==0.16.0
+hdbcli==2.14.18
 hana-ml==2.14.22101400

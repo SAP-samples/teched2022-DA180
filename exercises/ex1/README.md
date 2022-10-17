@@ -1,6 +1,6 @@
 # Exercise 1 - Loading and visualizing a public transportation network
 
-**This page outline the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
+**This page outlines the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
 - The Jupyter Notebooks contain the code for [1.1 importing data](code/2022_Q3_DA180_Ex_1.1_POI_and_GTFS_pub.ipynb) and [1.3 polling real-time positions](code/2022_Q3_DA180_Ex_1.3_GTFS_RT_pub.ipynb)
 - The [SQL file](code/2022_Q3_DA180_Ex_1_POI_and_GTFS_pub.sql) contains all the statements for this exercise
 
