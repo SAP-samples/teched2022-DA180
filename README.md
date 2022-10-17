@@ -15,10 +15,10 @@ Most of the spatial and graph related exercises can be run on an SAP HANA Cloud 
 ## Exercises
 
 - [Getting Started](exercises/ex0/)
-    - [Base Data & Demo Scenario](exercises/ex0#subex1)
-    - [SAP HANA Cloud setup](exercises/ex0#subex2)
-    - [DBeaver, QGIS/GDAL, hana-ml, and Cytoscape](exercises/ex0#subex3)
-    - [Background Material](exercises/ex0#subex4)
+    - [Base Data & Demo Scenario](exercises/ex0/README.md##subex1)
+    - [SAP HANA Cloud setup](exercises/ex0/README.md##subex2)
+    - [DBeaver, QGIS/GDAL, hana-ml, and Cytoscape](exercises/ex0/README.md##subex3)
+    - [Background Material](exercises/ex0/README.md##subex4)
 - [Exercise 1 - Loading and visualizing a public transportation network](exercises/ex1/)
     - [Exercise 1.1 - Importing Points of Interest from OpenStreetMaps and General Transit Feed Specification data](exercises/ex1/README.md#subex1)
     - [Exercise 1.2 - Understanding the GTFS datamodel](exercises/ex1/README.md#subex2)

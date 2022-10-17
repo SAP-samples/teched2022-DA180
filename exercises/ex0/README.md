@@ -16,7 +16,7 @@ The HANA database user you work with requires some roles and privileges
 * Roles `AFL__SYS_AFL_AFLPAL_EXECUTE` and `AFL__SYS_AFL_AFLPAL_EXECUTE_WITH_GRANT_OPTION` to execute PAL algorithms
 * System privileges `IMPORT` to run data uploads
 
-## DBeaver, QGIS, hana-ml, Cytoscape, and Enterprise Search<a name="subex3"></a>
+## DBeaver, QGIS, GDAL, hana-ml, Cytoscape<a name="subex3"></a>
 
 The SAP HANA Database Explorer provides an SQL editor, table viewer and data analysis tools, and a simple graph viewer. For a "full experience" we recommend the following tools in addition.
 
