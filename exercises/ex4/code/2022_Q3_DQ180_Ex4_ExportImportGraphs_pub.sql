@@ -11,36 +11,35 @@ SELECT * FROM "TECHED_USER_000"."GTFS_ROUTES";
 -- You can easily hop from one route to another if both share a stop.
 -- Let's make a graph that shows how well route(groups) are connected.
 
--- Create EDGES table by joining the routegroups
-CREATE TABLE TECHED_USER_000.ROUTE_EDGES AS (
+-- Create EDGES view by joining the routegroups
+CREATE OR REPLACE VIEW "TECHED_USER_000"."V_ROUTE_EDGES" AS (
 	WITH ROU AS ( -- get all a routegroups's stops
 		SELECT DISTINCT ROU."agency_id", ROU."RouteGroup", ST."stop_id"
-			FROM TECHED_USER_000.GTFS_ROUTES AS ROU
-			LEFT JOIN TECHED_USER_000.GTFS_TRIPS AS TRI ON ROU."route_id" = TRI."route_id" 
-			LEFT JOIN TECHED_USER_000.GTFS_STOPTIMES AS ST ON TRI."trip_id" = ST."trip_id"
+			FROM "TECHED_USER_000"."GTFS_ROUTES" AS ROU
+			LEFT JOIN "TECHED_USER_000"."GTFS_TRIPS" AS TRI ON ROU."route_id" = TRI."route_id"
+			LEFT JOIN "TECHED_USER_000"."GTFS_STOPTIMES" AS ST ON TRI."trip_id" = ST."trip_id"
 			WHERE "RouteGroup" IS NOT NULL
 	)
-	SELECT ROU1."RouteGroup" AS "SOURCE", ROU2."RouteGroup" AS "TARGET", COUNT(*) AS "NUM_SHARED_STOPS"
+	SELECT ROU1."RouteGroup"||'#'||ROU2."RouteGroup" AS "ID", ROU1."RouteGroup" AS "SOURCE", ROU2."RouteGroup" AS "TARGET", COUNT(*) AS "NUM_SHARED_STOPS"
 		FROM ROU AS ROU1, ROU AS ROU2
-		WHERE ROU1."stop_id" = ROU2."stop_id" AND ROU1."RouteGroup" < ROU2."RouteGroup" -- join two distinct routegroups if they share a stop 
+		WHERE ROU1."stop_id" = ROU2."stop_id" AND ROU1."RouteGroup" < ROU2."RouteGroup" -- join two distinct routegroups if they share a stop
 		GROUP BY ROU1."RouteGroup", ROU2."RouteGroup"
 );
--- add a primary key and not null constraints
-ALTER TABLE "TECHED_USER_000"."ROUTE_EDGES" ADD ("ID" BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY);
-ALTER TABLE "TECHED_USER_000"."ROUTE_EDGES" ALTER ("SOURCE" NVARCHAR(5000) NOT NULL, "TARGET" NVARCHAR(5000) NOT NULL);
+SELECT "SOURCE", "TARGET", "NUM_SHARED_STOPS" FROM "TECHED_USER_000"."V_ROUTE_EDGES";
 
 -- create a VERTCICES view
 CREATE OR REPLACE VIEW "TECHED_USER_000"."V_ROUTE_VERTICES" AS (
 	SELECT DISTINCT "RouteGroup", "agency_id" FROM "TECHED_USER_000"."GTFS_ROUTES" WHERE "RouteGroup" IS NOT NULL
 );
+SELECT * FROM "TECHED_USER_000"."V_ROUTE_VERTICES";
 
 -- create GRAPH WORKSPACE
 CREATE OR REPLACE GRAPH WORKSPACE "TECHED_USER_000"."GRAPH_GTFS_ROUTES"
-	EDGE TABLE "TECHED_USER_000"."ROUTE_EDGES"
+	EDGE TABLE "TECHED_USER_000"."V_ROUTE_EDGES"
 		SOURCE COLUMN "SOURCE"
 		TARGET COLUMN "TARGET"
 		KEY COLUMN "ID"
-	VERTEX TABLE "TECHED_USER_000"."V_ROUTE_VERTICES" 
+	VERTEX TABLE "TECHED_USER_000"."V_ROUTE_VERTICES"
 		KEY COLUMN "RouteGroup";
 
 
@@ -71,12 +70,3 @@ DO() BEGIN
 	SELECT * FROM :v_bc ORDER BY BC DESC;
 	SELECT * FROM :e_bc ORDER BY BC DESC;
 END;
-
-
-
-
-
-
-
-
-
