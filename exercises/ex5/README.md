@@ -158,17 +158,15 @@ The following result will be presented
 Then for the visualization, we collect the regions-shape and fuel station point data into __geopandas__ dataframes. This step may run for more than a minute.
 ````Python
 # Collecting the HANA dataframe fuel stations point location spatial data for visualization into geopandas dataframes
-stations_rnk_pd = stations_rnk_hdf.collect()
-stations_rnk_geopands = gpd.GeoDataFrame(
-    stations_rnk_pd, geometry=gpd.points_from_xy(stations_rnk_pd.longitude, stations_rnk_pd.latitude))
+stations_rnk_pd = stations_rnk_hdf.select('longitude_latitude_GEO').collect()
+stations_rnk_geopands = gpd.GeoDataFrame(stations_rnk_pd, geometry='longitude_latitude_GEO')
 
-stations_GER_pd = stations_GER_hdf.collect()
-stations_GER_geopands = gpd.GeoDataFrame(
-    stations_GER_pd, geometry=gpd.points_from_xy(stations_GER_pd.longitude, stations_GER_pd.latitude))
+stations_GER_pd = stations_GER_hdf.select('longitude_latitude_GEO').collect()
+stations_GER_geopands = gpd.GeoDataFrame(stations_GER_pd, geometry='longitude_latitude_GEO')
 
-# Collecting the HANA dataframe Germany region sspatial data for visualization into a geopandas dataframe
-regions_pd = regions_hdf.collect()
-regions_geopands = gpd.GeoDataFrame(regions_pd, geometry='SHAPE') 
+# Collecting the HANA dataframe Germany region spatial data for visualization into a geopandas dataframe
+regions_pd = regions_hdf.select('SHAPE').collect()
+regions_geopands = gpd.GeoDataFrame(regions_pd, geometry='SHAPE')
 ````
 
 <br>
