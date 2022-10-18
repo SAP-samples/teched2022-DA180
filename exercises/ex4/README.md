@@ -1,6 +1,6 @@
 # Exercise 4 - Export and import graphs
 
-In this exercise, we will create a new graph from the GTFS network which depicts how `ROUTES` - or to be precise: `RouteGroups` - are connected. We connect `RouteGroups` if they share a `STOP`.
+In this exercise, we will create a new graph from the GTFS network which depicts how `ROUTES` are connected by common `STOPS`.
 We then load this graph into [Cytoscape](https://cytoscape.org/) using a [SAP HANA plug-in](https://github.com/SAP/sap-hana-plugin-for-cytoscape) for advanced visualization. In exercise 2 we'll go the other way - we import a graph from Cytoscape into SAP HANA.
 
 ## Exercise 4.1 Export a graph<a name="subex1"></a>
