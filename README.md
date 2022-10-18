@@ -30,7 +30,7 @@ Most of the spatial and graph related exercises can be run on an SAP HANA Cloud 
     - [Exercise 3.1 - Import and export spatial vector data](exercises/ex3/README.md#subex1)
     - [Exercise 3.2 - Convert raster data using GDAL](exercises/ex3/README.md#subex2)
     - [Exercise 3.2 - Spatial clustering](exercises/ex3/README.md#subex3)
-- [Exercise 4 - Import and export graphs](exercises/ex4/)
+- [Exercise 4 - Export and import graphs](exercises/ex4/)
 - [Exercise 5 - Apply Forecasting to multi-model data](exercises/ex5/)
     - [Exercise 5.1 - Load, prepare and explore fuel station datasets](exercises/ex5/README.md#subex1)
     - [Exercise 5.2 - Load, prepare and explore fuel price datasets](/exercises/ex5/README.md#subex2)

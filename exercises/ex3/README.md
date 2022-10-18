@@ -205,4 +205,4 @@ We can overlay the `V_ROUTE_LINES` to add context.
 
 You've now imported spatial vector and raster data, and understand spatial clustering methods.
 
-Continue to - [Exercise 4 - Import and export graphs](../ex4/README.md)
+Continue to - [Exercise 4 - Export and import graphs](../ex4/README.md)
