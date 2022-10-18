@@ -13,8 +13,8 @@ SELECT * FROM "TECHED_USER_000"."GTFS_ROUTES";
 
 -- Create EDGES table by joining the routegroups
 CREATE TABLE TECHED_USER_000.ROUTE_EDGES AS (
-	WITH ROU AS ( -- get all a route's stops
-		SELECT DISTINCT ROU."agency_id", COALESCE(ROU."RouteGroup", ROU."route_id") AS "RouteGroup", ROU."route_id", ST."stop_id"
+	WITH ROU AS ( -- get all a routegroups's stops
+		SELECT DISTINCT ROU."agency_id", ROU."RouteGroup", ST."stop_id"
 			FROM TECHED_USER_000.GTFS_ROUTES AS ROU
 			LEFT JOIN TECHED_USER_000.GTFS_TRIPS AS TRI ON ROU."route_id" = TRI."route_id" 
 			LEFT JOIN TECHED_USER_000.GTFS_STOPTIMES AS ST ON TRI."trip_id" = ST."trip_id"
@@ -31,7 +31,7 @@ ALTER TABLE "TECHED_USER_000"."ROUTE_EDGES" ALTER ("SOURCE" NVARCHAR(5000) NOT N
 
 -- create a VERTCICES view
 CREATE OR REPLACE VIEW "TECHED_USER_000"."V_ROUTE_VERTICES" AS (
-	SELECT DISTINCT COALESCE("RouteGroup", "route_id") AS "RouteGroup", "agency_id" FROM "TECHED_USER_000"."GTFS_ROUTES" WHERE "RouteGroup" IS NOT NULL
+	SELECT DISTINCT "RouteGroup", "agency_id" FROM "TECHED_USER_000"."GTFS_ROUTES" WHERE "RouteGroup" IS NOT NULL
 );
 
 -- create GRAPH WORKSPACE
