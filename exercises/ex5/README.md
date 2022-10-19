@@ -53,7 +53,7 @@ conn= dataframe.ConnectionContext(address=host, port=port, user=user, password=p
 __Preparation Step - file downloads__  
 Note, the data used along with the exercises is thereas used only for the purpose of your personal education, for details about the use case data sources and licenses see the [data reference section](/exercises/ex5/README.md#subexDATAREF)  
 
-Download the following files to your project directory ./teched2022-DA180/data/fuelprice
+__Download the following files to your project directory ./teched2022-DA180/data/fuelprice__
 - Germany Landkreise regions shapefile from [here](https://data.opendatasoft.com/explore/dataset/georef-germany-kreis@public/download/?format=shp&timezone=Europe/Berlin&lang=en) and save it to ./data/fuelprice/
 - Germany fuel station data set from [here](https://dev.azure.com/tankerkoenig/_git/tankerkoenig-data?path=/stations/stations.csv) and save it to ./data/fuelprice/
 - Germany fuel price September 2022 data (or multiple months) from [here](https://dev.azure.com/tankerkoenig/_git/tankerkoenig-data?path=/prices/2022/09) as ZIP-download and extract the ZIP-file to a subfolder per month like ./data/fuelprice/09  
