@@ -1,5 +1,10 @@
 # Exercise 4 - Export and import graphs
 
+**This page outlines the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
+- The [SQL file](code/2022_Q3_DQ180_Ex4_ExportImportGraphs_pub.sql) contains all the statements for this exercise
+
+<hr>
+
 In this exercise, we will create a new graph from the GTFS network which depicts how `ROUTES` are connected by common `STOPS`.
 We then load this graph into [Cytoscape](https://cytoscape.org/) using a [SAP HANA plug-in](https://github.com/SAP/sap-hana-plugin-for-cytoscape) for advanced visualization. In exercise 2 we'll go the other way - we import a graph from Cytoscape into SAP HANA.
 

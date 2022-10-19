@@ -3,6 +3,8 @@
 **This page outlines the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
 - The [SQL file](code/2022_Q3_DA180_Ex_2_Routing_pub.sql) contains all the statements for this exercise
 
+<hr>
+
 In this exercise, we will look at the public transportation network of Adelaide, Australia, and learn how to run routing/pathfinding queries on this spatio-temporal network. For that, we create the networks edges and vertices from the GTFS data. Then we create a Graph Workspace in SAP HANA and run some "GraphScript" functions, which will answer "shortest path one-to-one" and "top k nearest neighbors" queries.
 
 ## Exercise 2.1 - Transform GTFS data and create a Graph Workspace<a name="subex1"></a>
@@ -76,7 +78,7 @@ CREATE OR REPLACE GRAPH WORKSPACE "TECHED_USER_000"."GRAPH_GTFS_POIS"
 		KEY COLUMN "ID";
 ````
 
-## Exercise 2.2 - Shortest paths and `TAVERSE DIJKSTRA`<a name="subex2"></a>
+## Exercise 2.2 - Shortest paths and `TRAVERSE DIJKSTRA`<a name="subex2"></a>
 
 The below GraphScript function will find shortest paths in the transportation network. It takes a start vertex, end vertex, and a parameter that indicates the time of our departure (in seconds), and returns a table with the path's edges. Basically, the program just calls the built-in `SHORTEST_PATH` algorithm, but the magic is in the edge weight expression which we need to pass to the SHORTEST_PATH algorithm
 - we can only take 'transport' connections that are in the future

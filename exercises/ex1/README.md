@@ -4,6 +4,10 @@
 - The Jupyter Notebooks contain the code for [1.1 importing data](code/2022_Q3_DA180_Ex_1.1_POI_and_GTFS_pub.ipynb) and [1.3 polling real-time positions](code/2022_Q3_DA180_Ex_1.3_GTFS_RT_pub.ipynb)
 - The [SQL file](code/2022_Q3_DA180_Ex_1_POI_and_GTFS_pub.sql) contains all the statements for this exercise
 
+Whenever we refer to a SAP HANA database object like a table, we use a qualified name, i.e. the first part is the database schema: "TECHED_USER_000"."POIS". Depending on your environment you might need to search&replace the schema name.
+
+<hr>
+
 In this exercise, we will look at the public transportation network of Adelaide, Australia.
 First, we will load two sets of data. One is a list of Points of Interest (POIs) which we pull from OpenStreetMap (OSM). The other one is a GTFS (General Transportation Feed Specification) set of files. The GTFS files describe public transport schedules, so basically when busses/metros depart from stations. We will take a look at the GTFS datamodel and plot it on a map. In the last step, we will poll a GTFS API for real-time vehicle positions.
 

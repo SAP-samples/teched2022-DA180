@@ -3,6 +3,8 @@
 **This page outlines the sequence and most important steps of this exercise. The complete set of steps are in the code files.**
 - The [SQL file](code/2022_Q3_DA180_Ex_3_ImportExportRaster_pub.sql) contains all the statements for this exercise
 
+<hr>
+
 In this exercise, we will deal with spatial vector and raster data. You can think of vector data as real geometries, e.g. polygons, and there are many file formats for vector data. Probably the most common format is Esri shapefiles. Spatial raster data are images. For each pixel in a spatial image, there is a specific spatial measure, e.g. the elevation or the land use class. Relational databases are not suitable to store images, but there are ways to convert a raster to a vector file.
 
 First we will upload some spatial vector data. We'll start with an Esri shapefile and use SAP HANA Database Explorer to pull the data into a table. Next we will use QGIS to ingest a .kml file.
@@ -11,13 +13,13 @@ Finally, we will show some spatial clustering techniques.
 
 ## Exercise 3.1 - Import and export spatial vector data<a name="subex1"></a>
 
-There is some public data describing the [land use in Australia](https://data.sa.gov.au/data/dataset/land-use-generalised/resource/797444b1-633f-47ed-804d-fcbbeafca352). Since this file is pretty large, we "clipped" it. This clipped, downsized version of the land use data is the [data folder](../../data/vector).
+There is some public data describing the [land use in Australia](https://data.sa.gov.au/data/dataset/land-use-generalised/resource/797444b1-633f-47ed-804d-fcbbeafca352). Since this file is pretty large, we "clipped" it. This clipped, downsized version of the land use data is the [data folder](../../data/vector): "LandUseGeneralised2021_GDA2020.zip".
 
 Open the SAP HANA Database Explorer, right click on the T22 system, and choose "import data". A new screen opens, choose "import Esri shapefile".
 
 ![](images/dbx1.png)
 
-In the next step, choose the zip file which contains the shapefiles.
+In the next step, choose the zip file which contains the shapefiles: "LandUseGeneralised2021_GDA2020.zip".
 
 ![](images/dbx2.png)
 
