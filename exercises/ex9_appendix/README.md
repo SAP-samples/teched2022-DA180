@@ -25,6 +25,8 @@ osmnx==0.16.0
 hdbcli==2.14.18  
 hana-ml==2.14.22101400
 
+Important note: the geopandas package (and thus the required gdal and fiona packages) are only required for some parts of the exercise 5 and 6, thus can be omitted if you focus on exercises 1-4.
+
 Prepare installation of required python packages in your Python envrionment using this [requirements.txt](https://github.com/SAP-samples/teched2022-DA180/blob/main/exercises/ex9_appendix/requirements.txt) and the following python install command
 ````Python
 pip install -r requirements.txt
@@ -52,6 +54,8 @@ If you experience challenges with installing the required packages, it is recomm
 !pip install osmnx==0.16.0
 !pip install hdbcli==2.14.18
 !pip install hana-ml==2.14.22101400
-
-
 ````
+Further note regarding the  geopandas, gdal and fiona package install
+If your python envrionment is a anaconda envrionment, one recommended approach to install geopandas is to use conda install from conda-forge, then you don't require explicit gdal and fiona install. The conda install would look like:
+- conda config --env --add channels conda-forge
+- conda install geopandas
