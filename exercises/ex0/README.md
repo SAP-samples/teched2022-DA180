@@ -8,6 +8,13 @@ Graphs describe networks as a set of vertices and edges. The public GTFS data we
 
 Forecasting and Machine Learning techniques from SAP HANA's Predictive Analysis Library (PAL) will be applied to fuel price- and fuel station data from Germany, where we use multi-model functions like spatial filtering, distance calculation from stations to highway network graph, etc. to enrich the fuel price data to be analyzed and determine potential importance of spatial attributes on price levels.
 
+
+## Working with the Exercise Scripts
+
+Whenever we refer to a SAP HANA database object like a table, we use a qualified name, i.e. the first part is the database schema: `"TECHED_USER_000"."POIS"`. Depending on your environment you might need to **search&replace the schema name** in the code scripts.
+
+You will find **file paths** in code. Depending on your environment the actual file path will vary based on location and OS type.
+
 ## SAP HANA Cloud setup<a name="subex2"></a>
 
 Some of the exercises and processing patterns can be run on a free SAP HANA Cloud trial system. To get one, visit [SAP HANA Cloud Trial home](https://www.sap.com/cmp/td/sap-hana-cloud-trial.html). To run the machine learning exercises (5 and 6) and to work with JSON data using the Document Store (ex 1), you will need a full SAP HANA Cloud. Make sure to enable the **Script Server** and **Document Store**. Refer to [SAP HANA Cloud Administration with SAP HANA Cloud Central](https://help.sap.com/viewer/9ae9104a46f74a6583ce5182e7fb20cb/hanacloud/en-US/e379ccd3475643e4895b526296235241.html) for details.
