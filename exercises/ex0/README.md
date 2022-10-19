@@ -31,7 +31,7 @@ The SAP HANA Database Explorer provides an SQL editor, table viewer and data ana
 
 **QGIS**<br>an open source Geographical Information System (GIS). QGIS can connect to SAP HANA and provides great tools for advanced maps. Again, read Mathias' blog to [get it up and running](https://blogs.sap.com/2021/03/01/creating-a-playground-for-spatial-analytics/).
 
-**GDAL**<br>a translator library for raster and vector spatial data format. If you do a standard installation of QGIS which includes OS4GEO, you got GDAL on your system. See Vitalij's blog [GDAL with SAP HANA driver in OSGeo4W](https://blogs.sap.com/2022/08/04/gdal-with-sap-hana-driver-in-osgeo4w/)
+**GDAL**<br>a translator library for raster and vector spatial data format. If you do a standard installation of QGIS which includes OSGeo4W, you got GDAL on your system. See Vitalij's blog [GDAL with SAP HANA driver in OSGeo4W](https://blogs.sap.com/2022/08/04/gdal-with-sap-hana-driver-in-osgeo4w/)
 
 **hana-ml**, Jupyter Notebook<br>we used the python machine learning client for SAP HANA and Jupyter Notebooks to load JSON data into the document store. There is a lot more in hana-ml for the data scientist - see [pypi.org](https://pypi.org/project/hana-ml/) and [hana-ml reference](https://help.sap.com/doc/1d0ebfe5e8dd44d09606814d83308d4b/latest/en-US/index.html). More detailed guidance on the Python environment setup is given in [Prepare your Python environment](/exercises/ex9_appendix/README.md#appA-sub1)
 
