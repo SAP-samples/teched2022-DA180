@@ -60,7 +60,7 @@ If we zoom in, we can see the individual pixels. The colors indicate the populat
 
 Now there are two main methods to convert raster files to vectors: polygonize and contour. The polygonize method groups adjacent pixels with the same values - in our case the same population density - and calculates the bounding polygon. The contour method creates contour lines at specified intervals. We know this from general maps where the elevation is captured as lines marking the 100m, 200m ... levels. You can use both methods within QGIS. The library that QGIS uses for these transformation is [GDAL](https://gdal.org/). GDAL is the "rosetta stone" for spatial formats. It let's you convert from basically every input format into every output format. Since there is a GDAL HANA adapter available since 2022, we will use GDAL directly from the command line.
 
-First we try "contouring" our population density .tif file by running the following command in an (OSGeo4W)[../ex0/README.md#subex3] shell. We'll get contour lines for intervals of size 10 and store the output as a shapefile.
+First we try "contouring" our population density .tif file by running the following command in an [OSGeo4W](../ex0/README.md#subex3) shell. We'll get contour lines for intervals of size 10 and store the output as a shapefile.
 
 ````
 gdal_contour -p -amin DN -i 10.0 "C:\data\raster\worldpop_adelaide.tif" "C:\data\raster\contour\worldpop_adelaide_contour.shp"
@@ -69,7 +69,7 @@ If we bring the shapefile into QGIS and zoom in, we can see the individual polyg
 
 ![](images/contour.png)
 
-We can now bring in the contour data like we did before. But first let's try the other raster-to-vector transformation method: polygonize. Again we ran a command from the OSGeo4W shell to let GDAL do the transformation.
+We can now bring in the contour data like we did before. But first let's try the other raster-to-vector transformation method: polygonize. Again we ran a command from the [OSGeo4W](../ex0/README.md#subex3) shell to let GDAL do the transformation.
 
 ````
 gdal_polygonize "C:\data\raster\worldpop_adelaide.tif" "C:\data\raster\polygonized\worldpop_adelaide_polygonized.shp"
