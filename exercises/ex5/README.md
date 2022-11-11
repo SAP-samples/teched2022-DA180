@@ -591,6 +591,6 @@ fc_acc.collect()
 
 The __gas station and fuel price data__ is published on the public website [Tankerkönig](http://www.tankerkoenig.de/). This dataset contains the gas prices of all gas stations in Germany from 2014 until today as csv files. A record contains the station id, the datetime, prices for diesel, e5 and e10 and a change indicator. In a separate csv the data of the service stations including its geolocation is provided.
 
-The data used along with the exercises is thereas used only for the purpose of your personal education. For non-commercial use the data is availble with the following license agreement https://creativecommons.org/licenses/by-nc-sa/4.0/.
+The data used along with the exercises is thereas used only for the purpose of your personal education. The data is availble with the following license agreement [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by/4.0/).
 
 The __German "Landkreise"-regional geo data__ is shared and can be downloaded from [data.opendatasoft.com/georef-germany-kreis](https://data.opendatasoft.com/explore/dataset/georef-germany-kreis%40public/export/?disjunctive.lan_code&disjunctive.lan_name&disjunctive.krs_code&disjunctive.krs_name&disjunctive.krs_name_short!%5Bimage.png%5D(attachment:image.png)&disjunctive.krs_name_short). This dataset is licensed under the "Data licence Germany – attribution – version 2.0", see https://www.govdata.de/dl-de/by-2-0 and allowed for commercial and non-commercial use under reference of the license.
