@@ -123,10 +123,10 @@ The following result will be presented
 
 ````Python
 # filter service stations in Germany using SAP HANA spatial intersect
-stations_rnk_hdf = stations_hdf.join(regions_hdf, 
-  '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1').filter(
+stations_rnk_hdf = stations_hdf.join(regions_hdf.filter(
   "\"krs_name\"='Landkreis Rhein-Neckar-Kreis' or \"krs_name\"='Stadtkreis Heidelberg' or \"krs_name\"='Stadtkreis Mannheim'"
-  )
+  ), 
+  '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1')
 
 # Show the SQL statement for the HANA dataframe "stations_rnk_hdf"
 print(stations_rnk_hdf.select_statement, "\n")
@@ -143,10 +143,10 @@ __Step 4 - Visualize the stations on a map in Python__
 First we __spatially filter__ the remaining fuel stations into another HANA dataframe.
 ````Python
 # filter service stations in Germany to those NOT within the "Rhein-Neckar-Kreis"-region
-stations_GER_hdf = stations_hdf.join(regions_hdf, 
- '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1').filter(
+stations_GER_hdf = stations_hdf.join(regions_hdf.filter(
  "\"krs_name\"!='Landkreis Rhein-Neckar-Kreis' AND \"krs_name\"!='Stadtkreis Heidelberg' AND \"krs_name\"!='Stadtkreis Mannheim'"
- )
+ ), 
+ '"longitude_latitude_GEO".ST_SRID(25832).st_transform(25832).st_intersects(SHAPE)=1')
 
 # Count the number of service stations in Germany, excluding the ones selected around the SAP Headquarters and area
 print("Number of Service Stations in Germany, excluding the one in 'Rhein-Neckar-Kreis'-region",stations_GER_hdf.count()) 
@@ -283,7 +283,7 @@ f = plt.figure(figsize=(8,3))
 ax1 = f.add_subplot(111)
 
 eda = EDAVisualizer(ax1)
-ax, dist_data = eda.distribution_plot( data=fuelprice_all_hdf, column="e5", bins=30, 
+ax, dist_data = eda.distribution_plot( data=fuelprice_all_hdf, column="e5", bins=29, 
                                       title="Distribution of E5 prices", debrief=False)
 plt.show()
 ````
@@ -356,7 +356,7 @@ Next, we want to __sample the last week period__ of our time series fuel price d
 print( "The dataset covers the time period starting from: ")
 print( fuelprice_rnk_hdf.sort('date').select('date').head(1).collect(), "\n")
 print( "... and ends at: ")
-print( fuelprice_rnk_hdf.sort('date', desc=True).select('date').head(1).collect()) 
+print( conn.sql(f'SELECT MAX("date") as "date" FROM ( {fuelprice_rnk_hdf.select_statement})').collect()) 
 ````
 ![](/exercises/ex5/images/5.3.2-price_fc_timeperiod.png)
 <br>
