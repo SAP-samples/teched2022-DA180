@@ -1,3 +1,5 @@
+[![REUSE status](https://api.reuse.software/badge/github.com/SAP-samples/teched2022-DA180)](https://api.reuse.software/info/github.com/SAP-samples/teched2022-DA180)
+
 # DA180 - Getting Started with Multi-Model Capabilities in SAP HANA Cloud
 
 ## Description
